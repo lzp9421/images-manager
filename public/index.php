@@ -58,7 +58,12 @@ class Application extends BaseApplication
             ],
         ]);
 
-        echo $this->handle()->getContent();
+        try {
+            echo $this->handle()->getContent();
+        } catch (\Exception $e) {
+            var_dump($e);
+        }
+
     }
 }
 
