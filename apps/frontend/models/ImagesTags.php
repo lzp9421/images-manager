@@ -10,7 +10,7 @@ namespace Multiple\Frontend\Models;
 
 use Phalcon\Mvc\Model;
 
-class NbaImagesTags extends Model
+class ImagesTags extends Model
 {
 
 }

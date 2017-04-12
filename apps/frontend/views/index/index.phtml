@@ -1,3 +1,277 @@
-<h1>Welcome</h1>
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <?= $this->tag->stylesheetLink('statics/bootstrap/css/bootstrap.min.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/treeview/bootstrap-treeview.min.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/viewer/viewer.min.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/css/index.css'); ?>
+    <title>图片管理系统</title>
+</head>
+<body class="container">
 
-<?php echo $this->url->get(['for' => 'frontend', 'controller' => 'index', 'action' => 'index']) ?>
+<div class="row">
+
+    <aside class="col-md-3 visible-md-block visible-lg-block pull-left">
+        <section>
+            section
+        </section>
+        <nav>
+            <div id="tree"></div>
+        </nav>
+    </aside>
+
+    <div class="col-md-9 col-sm-12 col-xs-12 pull-right">
+        <header>
+            header
+        </header>
+
+        <section>
+            <h2 class="row">
+                <div class="col-md-2 col-sm-2 col-xs-3">
+                    <button class="btn btn-block btn-primary">上传</button>
+                </div>
+                <div class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
+                    <button class="btn btn-block btn-danger">删除</button>
+                </div>
+            </h2>
+            <hr>
+            <div id="images-wall" class="row"></div>
+        </section>
+    </div>
+
+</div>
+
+<?= $this->tag->javascriptInclude('statics/jquery/jquery.min.js');?>
+<?= $this->tag->javascriptInclude('statics/bootstrap/js/bootstrap.min.js');?>
+<?= $this->tag->javascriptInclude('statics/treeview/bootstrap-treeview.min.js');?>
+<?= $this->tag->javascriptInclude('statics/viewer/viewer.min.js');?>
+<?= $this->tag->javascriptInclude('statics/masonry/masonry.pkgd.min.js');?>
+<?= $this->tag->javascriptInclude('statics/imagesLoaded/imagesloaded.pkgd.min.js');?>
+
+<script src="https://cdn.bootcss.com/jquery-infinitescroll/2.0b2.120520/jquery.infinitescroll.min.js"></script>
+
+<script>
+
+    $(function () {
+        var container = $('#images-wall');
+        // 图片墙
+
+
+        var options = {
+            itemSelector : '.box',
+            columnWidth: 1,
+            isAnimated: true
+        };
+
+        container.masonry(options);
+
+        var wall = new ImageWall(container, function (html) {
+            // 图片墙html加载之后执行
+            var imgLoad = imagesLoaded(html);
+            imgLoad.on( 'progress', function(instance, image) {
+                // 图片加载后，根据是否加载成功，标记图片样式
+                if (image.isLoaded) {
+                    $(image.img).removeClass('loading');
+                } else {
+                    $(image.img).addClass('broken');
+                }
+                container.append(html).masonry('appended', html);
+            });
+        });
+
+
+        container.viewer();
+
+        // 建立树形菜单
+        var tree = new Tree(function (view) {
+            $('#tree').treeview({
+                data: view,
+                onNodeSelected: function(event, data) {
+                    console.log(event, data);
+                    if (typeof (data.game_id) !== 'undefined') {
+                        wall.clear();
+                        container.masonry('destroy');
+                        container.masonry(options);
+                        wall.loadFromGame(data.game_id)
+                    }
+                }
+            });
+        });
+        // 获取菜单并显示
+        tree.refresh();
+        wall.loadFromGame(1);
+
+    });
+
+
+    // 树形菜单
+    function Tree(func) {
+        this.func = func;
+        this.api = 'games';
+        this.tag = '';
+        this.start_time = '';
+        this.end_time = '';
+        this.keywords = '';
+        this.tree = {};
+        this.view = {};
+
+        Date.prototype.Format = function(fmt) { //author: meizz
+            var o = {
+                "M+" : this.getMonth() + 1,               //月份
+                "d+" : this.getDate(),                    //日
+                "h+" : this.getHours(),                   //小时
+                "m+" : this.getMinutes(),                 //分
+                "s+" : this.getSeconds(),                 //秒
+                "q+" : Math.floor((this.getMonth()+3)/3), //季度
+                "S"  : this.getMilliseconds()             //毫秒
+            };
+            if(/(y+)/.test(fmt))
+                fmt=fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for(var k in o)
+                if(new RegExp("(" + k + ")").test(fmt))
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+            return fmt;
+        };
+
+        this.refresh = function (tag, start_time, end_time, keywords) {
+            var that = this;
+            tag && (this.tag = tag);
+            start_time && (this.start_time = start_time);
+            end_time && (this.end_time = end_time);
+            keywords && (this.end_time = keywords);
+            // 拿到数据
+            this.getData(function () {
+                // 绘制菜单
+                that.paint();
+            });
+        };
+        // 通过Ajax获取数据，并调用dateToTree转换为树状结构
+        this.getData = function (func) {
+            var that = this;
+            $.get(this.api, {
+                tag: this.tag,
+                start_time: this.start_time,
+                end_time: this.end_time,
+                keywords: this.keywords
+            }, function (data) {
+                for (var key in data) {
+                    that.dateToTree(data[key]);
+                }
+                func();
+            });
+        };
+        // 将键值对格式数据转换为树形结构数据
+        this.dateToTree = function (data) {
+            // {date: "date_content", type: "type_content", id: 0, name: ""} --> {type_content: {date_content: {id: 0, name: ""}}}
+            var type = data.type;
+            var date = data.date;
+            var name = data.name;
+            var d = new Date(Date.parse(date));
+            var year = d.Format('yyyy年');
+            var month = d.Format('M月');
+            typeof (this.tree[type]) === 'undefined' && (this.tree[type] = {});
+            typeof (this.tree[type][year]) === 'undefined' && (this.tree[type][year] = {});
+            typeof (this.tree[type][year][month]) === 'undefined' && (this.tree[type][year][month] = {});
+            typeof (this.tree[type][year][month][date]) === 'undefined' && (this.tree[type][year][month][date] = {});
+            this.tree[type][year][month][date][name] = data.id;
+        };
+        // 递归生成菜单树
+        var d = new Date();
+        this.year = d.Format('yyyy年');
+        this.month = d.Format('M月');
+        this.date = d.Format('yyyy-MM-dd');
+        this.toView = function (tree) {
+            var view = [];
+            for (var key in tree) {
+                if (typeof (tree[key]) === 'object') {
+                    // 继续迭代
+                    if (this.year === key || this.month === key || this.date === key) {
+                        view.push({text: key, state:{expanded:true, checked: true}, nodes: this.toView(tree[key])});
+                    } else {
+                        view.push({text: key, nodes: this.toView(tree[key])});
+                    }
+                } else {
+                    view.push({text: key, game_id: tree[key]});
+                }
+            }
+            return view;
+        };
+        // 绘制树形菜单
+        this.paint = function () {
+            var view = this.toView(this.tree);
+            this.func(view);
+        };
+    }
+
+    // 图片墙
+    // container:jquery对象
+    // func:生成html并插入页面之后调用等回调
+    function ImageWall(container, func) {
+        this.func = func;
+        this.container = container;
+        this.api = 'images';
+
+        this.game_id = '';
+        this.tag = '';
+        this.start_time = '';
+        this.end_time = '';
+        this.keywords = '';
+        // 从比赛id中加载图片
+        this.loadFromGame = function (game_id) {
+            this.game_id = game_id;
+            this.tag = '';
+            this.start_time = '';
+            this.end_time = '';
+            this.keywords = '';
+            this.getImage();
+        };
+        // 通过查询条件加载图片
+        this.loadFromCondition = function (tag, start_time, end_time, keywords) {
+            this.game_id = '';
+            this.tag = tag;
+            this.start_time = start_time;
+            this.end_time = end_time;
+            this.keywords = keywords;
+            this.getImage();
+        };
+        // ajax加载图片并插入到图片墙
+        this.getImage = function () {
+            var that = this;
+            var html = $('');
+            $.get(this.api, {
+                game_id: this.game_id,
+                tag: this.tag,
+                start_time: this.start_time,
+                end_time: this.end_time,
+                keywords: this.keywords
+            }, function (data) {
+                for (var key in data) {
+                    html = that.dataToHtml(data[key]);
+                    that.func(html);
+                }
+            });
+        };
+        // 获取到的json数据转换为html数据
+        this.dataToHtml = function (data) {
+            // {"id": "1", "name": "test", "url": "http:\/\/wwww", "game_id": "1"} --> html
+            var section = $('<section class="box col-md-3 col-sm-4 col-xs-6" image-id="' + data.id + '"></section>');
+            var title = $('<div class="title"><h3>' + data.name + '</h3></div>');
+            var image = $('<img src="' + data.url + '" alt="" title="' + data.name + '" class="img-thumbnail">');
+            var option = $('<div class="option"></div>');
+            var ul = $('<ul></ul>');
+            var remove = $('<li title="删除"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
+            var edit = $('<li title="编辑"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></li>');
+            return section.append(title).append(image).append(option.append(ul.append(remove,edit)));
+        };
+        this.clear = function () {
+            this.container.empty();
+        }
+    }
+
+</script>
+
+</body>
+</html>
