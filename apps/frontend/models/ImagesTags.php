@@ -13,4 +13,27 @@ use Phalcon\Mvc\Model;
 class ImagesTags extends Model
 {
 
+    public function initialize()
+    {
+
+        $this->belongsTo(
+            "image_id",
+            "Multiple\\Frontend\\Models\\Images",
+            "id",
+            [
+                "alias" => "Images",
+            ]
+        );
+
+        $this->belongsTo(
+            "tag_id",
+            "Multiple\\Frontend\\Models\\Tags",
+            "id",
+            [
+                "alias" => "Tags",
+            ]
+        );
+
+    }
+
 }

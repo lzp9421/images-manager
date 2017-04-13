@@ -18,6 +18,14 @@ class Images extends Model
                 "alias" => "Game",
             ]
         );
+        $this->hasMany(
+            "id",
+            "Multiple\\Frontend\\Models\\ImagesTags",
+            "image_id",
+            [
+                "alias" => "ImagesTags",
+            ]
+        );
         $this->hasManyToMany(
             "id",
             "Multiple\\Frontend\\Models\\ImagesTags",

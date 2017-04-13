@@ -7,13 +7,13 @@
     <?= $this->tag->stylesheetLink('statics/bootstrap/css/bootstrap.min.css'); ?>
     <?= $this->tag->stylesheetLink('statics/treeview/bootstrap-treeview.min.css'); ?>
     <?= $this->tag->stylesheetLink('statics/viewer/viewer.min.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/tagEditor/css/jquery.tag-editor.css'); ?>
     <?= $this->tag->stylesheetLink('statics/css/index.css'); ?>
     <title>图片管理系统</title>
 </head>
 <body class="container">
 
 <div class="row">
-
     <aside class="col-md-3 visible-md-block visible-lg-block pull-left">
         <section>
             section
@@ -22,7 +22,6 @@
             <div id="tree"></div>
         </nav>
     </aside>
-
     <div class="col-md-9 col-sm-12 col-xs-12 pull-right">
         <header>
             header
@@ -30,37 +29,119 @@
 
         <section>
             <h2 class="row">
-                <div class="col-md-2 col-sm-2 col-xs-3">
+                <span class="col-md-2 col-sm-2 col-xs-3">
                     <button class="btn btn-block btn-primary">上传</button>
-                </div>
-                <div class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
+                </span>
+                <span class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
                     <button class="btn btn-block btn-danger">删除</button>
-                </div>
+                </span>
             </h2>
             <hr>
             <div id="images-wall" class="row"></div>
         </section>
     </div>
-
 </div>
 
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="image-editor" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编辑图片信息</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="image-game_id">
+                    <input type="hidden" id="image-id">
+                    <div class="form-group row">
+                        <div class="col-md-2 col-sm-2 col-xs-3 text-right">
+                            <label for="name" class="form-control-static">名称</label>
+                        </div>
+                        <div class="col-md-10 col-sm-10 col-xs-9">
+                            <input type="text" id="image-name" class="form-control" placeholder="支持输入图片名称，必填，1~50个汉字">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2 col-sm-2 col-xs-3 text-right">
+                            <label for="name" class="form-control-static">标签</label>
+                        </div>
+                        <div class="col-md-10 col-sm-10 col-xs-9">
+                            <input type="text" id="tags-editor">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-offset-2 col-md-10 col-sm-offset-2 col-sm-10 col-xs-offset-3 col-xs-9">
+                            <div class="panel panel-default">
+                                <div class="panel-body tags-label" id="nba-tags-label" style="display: none"></div>
+                                <div class="panel-body tags-label" id="football-tags-label" style="display: none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="update-image" class="btn btn-primary">提交更改</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
 <?= $this->tag->javascriptInclude('statics/jquery/jquery.min.js');?>
 <?= $this->tag->javascriptInclude('statics/bootstrap/js/bootstrap.min.js');?>
 <?= $this->tag->javascriptInclude('statics/treeview/bootstrap-treeview.min.js');?>
 <?= $this->tag->javascriptInclude('statics/viewer/viewer.min.js');?>
 <?= $this->tag->javascriptInclude('statics/masonry/masonry.pkgd.min.js');?>
 <?= $this->tag->javascriptInclude('statics/imagesLoaded/imagesloaded.pkgd.min.js');?>
+<?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.tag-editor.js');?>
+<?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.caret.min.js');?>
 
 <script src="https://cdn.bootcss.com/jquery-infinitescroll/2.0b2.120520/jquery.infinitescroll.min.js"></script>
 
 <script>
 
-    $(function () {
-        var container = $('#images-wall');
+    $(() => {
+        $.get('tags', {
+            type: '足球'
+        }, (tags) => {
+            for (let tag of tags) {
+                let label = $('<label for="tag-' + tag.id + '"></label>');
+                let checkbox = $('<input type="checkbox" id="tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
+                let span = $('<span class="label label-info">' + tag.name + '</span>');
+                $('#football-tags-label').append(label.append(checkbox, span));
+            }
+        });
+        $.get('tags', {
+            type: '篮球'
+        }, (tags) => {
+            for (let tag of tags) {
+                let label = $('<label for="tag-' + tag.id + '"></label>');
+                let checkbox = $('<input type="checkbox" id="tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
+                let span = $('<span class="label label-info">' + tag.name + '</span>');
+                $('#nba-tags-label').append(label.append(checkbox, span));
+            }
+        });
+
+        // 提交图片信息修改
+        $('#update-image').on('click', () => {
+            $.post('images/update', {
+                id: $('#image-id').val(),
+                name: $('#image-name').val(),
+                game_id: $('#image-game_id').val(),
+                tag_names: $('#tags-editor').tagEditor('getTags')[0].tags
+            }, (data) => {
+                console.log(data);
+            });
+        });
+
+    });
+
+    $(() => {
+        const container = $('#images-wall');
         // 图片墙
 
-
-        var options = {
+        const options = {
             itemSelector : '.box',
             columnWidth: 1,
             isAnimated: true
@@ -68,29 +149,62 @@
 
         container.masonry(options);
 
-        var wall = new ImageWall(container, function (html) {
+        const wall = new ImageWall(container, () => {
             // 图片墙html加载之后执行
-            var imgLoad = imagesLoaded(html);
-            imgLoad.on( 'progress', function(instance, image) {
+            const imgLoad = imagesLoaded(container);
+            imgLoad.on('progress', (instance, image) => {
                 // 图片加载后，根据是否加载成功，标记图片样式
                 if (image.isLoaded) {
                     $(image.img).removeClass('loading');
                 } else {
                     $(image.img).addClass('broken');
                 }
-                container.append(html).masonry('appended', html);
+                $(image.img).parent('section').css('visibility', 'visible');
+                container.masonry('appended', $(image.img).parent('section'));
+            });
+            imgLoad.on('always', () => {
+                container.viewer();
+                $('.edit').on('click', (event) => {
+                    let tags = JSON.parse($(event.currentTarget).parents('section').attr('tags'));
+                    let initial_tags = [];
+                    for (let tag of tags) {
+                        initial_tags.push(tag.name);
+                    }
+                    $('#tags-editor').tagEditor('destroy');
+                    $('#tags-editor').val('');
+                    $('#tags-editor').tagEditor({
+                        initialTags: initial_tags,
+                        delimiter: ', ',
+                        placeholder: '输入或选择标签，输入多个标签以空格分割'
+                    });
+                    // 加入赛事id
+                    $('#image-game_id').val($(event.currentTarget).parents('section').attr('game-id'));
+                    // 加入图片id
+                    $('#image-id').val($(event.currentTarget).parents('section').attr('image-id'));
+                    // 加入图片名称
+                    $('#image-name').val($(event.currentTarget).parents('section').attr('image-name'));
+                    // 内置标签选择框，只显示当前分类的标签
+                    let type = $(event.currentTarget).parents('section').attr('type');
+                    switch (type) {
+                        case '篮球':
+                            $('#football-tags-label').css('display', 'none');
+                            $('#nba-tags-label').css('display', 'block');
+                            break;
+                        case '足球':
+                            $('#nba-tags-label').css('display', 'none');
+                            $('#football-tags-label').css('display', 'block');
+                            break;
+                        default:
+                    }
+                });
             });
         });
 
-
-        container.viewer();
-
         // 建立树形菜单
-        var tree = new Tree(function (view) {
+        const tree = new Tree((view) => {
             $('#tree').treeview({
                 data: view,
-                onNodeSelected: function(event, data) {
-                    console.log(event, data);
+                onNodeSelected: (event, data) => {
                     if (typeof (data.game_id) !== 'undefined') {
                         wall.clear();
                         container.masonry('destroy');
@@ -106,7 +220,6 @@
 
     });
 
-
     // 树形菜单
     function Tree(func) {
         this.func = func;
@@ -119,7 +232,7 @@
         this.view = {};
 
         Date.prototype.Format = function(fmt) { //author: meizz
-            var o = {
+            const o = {
                 "M+" : this.getMonth() + 1,               //月份
                 "d+" : this.getDate(),                    //日
                 "h+" : this.getHours(),                   //小时
@@ -130,48 +243,46 @@
             };
             if(/(y+)/.test(fmt))
                 fmt=fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-            for(var k in o)
+            for(let k in o)
                 if(new RegExp("(" + k + ")").test(fmt))
-                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+                    fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
             return fmt;
         };
 
-        this.refresh = function (tag, start_time, end_time, keywords) {
-            var that = this;
+        this.refresh = (tag, start_time, end_time, keywords) => {
             tag && (this.tag = tag);
             start_time && (this.start_time = start_time);
             end_time && (this.end_time = end_time);
             keywords && (this.end_time = keywords);
             // 拿到数据
-            this.getData(function () {
+            this.getData(() => {
                 // 绘制菜单
-                that.paint();
+                this.paint();
             });
         };
         // 通过Ajax获取数据，并调用dateToTree转换为树状结构
-        this.getData = function (func) {
-            var that = this;
+        this.getData = (func) => {
             $.get(this.api, {
                 tag: this.tag,
                 start_time: this.start_time,
                 end_time: this.end_time,
                 keywords: this.keywords
-            }, function (data) {
-                for (var key in data) {
-                    that.dateToTree(data[key]);
+            }, (data) => {
+                for (let key in data) {
+                    this.dateToTree(data[key]);
                 }
                 func();
             });
         };
         // 将键值对格式数据转换为树形结构数据
-        this.dateToTree = function (data) {
+        this.dateToTree = (data) => {
             // {date: "date_content", type: "type_content", id: 0, name: ""} --> {type_content: {date_content: {id: 0, name: ""}}}
-            var type = data.type;
-            var date = data.date;
-            var name = data.name;
-            var d = new Date(Date.parse(date));
-            var year = d.Format('yyyy年');
-            var month = d.Format('M月');
+            const type = data.type;
+            const date = data.date;
+            const name = data.name;
+            const d = new Date(Date.parse(date));
+            const year = d.Format('yyyy年');
+            const month = d.Format('M月');
             typeof (this.tree[type]) === 'undefined' && (this.tree[type] = {});
             typeof (this.tree[type][year]) === 'undefined' && (this.tree[type][year] = {});
             typeof (this.tree[type][year][month]) === 'undefined' && (this.tree[type][year][month] = {});
@@ -179,13 +290,13 @@
             this.tree[type][year][month][date][name] = data.id;
         };
         // 递归生成菜单树
-        var d = new Date();
+        const d = new Date();
         this.year = d.Format('yyyy年');
         this.month = d.Format('M月');
         this.date = d.Format('yyyy-MM-dd');
-        this.toView = function (tree) {
-            var view = [];
-            for (var key in tree) {
+        this.toView = (tree) => {
+            const view = [];
+            for (let key in tree) {
                 if (typeof (tree[key]) === 'object') {
                     // 继续迭代
                     if (this.year === key || this.month === key || this.date === key) {
@@ -200,8 +311,8 @@
             return view;
         };
         // 绘制树形菜单
-        this.paint = function () {
-            var view = this.toView(this.tree);
+        this.paint = () => {
+            const view = this.toView(this.tree);
             this.func(view);
         };
     }
@@ -220,7 +331,7 @@
         this.end_time = '';
         this.keywords = '';
         // 从比赛id中加载图片
-        this.loadFromGame = function (game_id) {
+        this.loadFromGame = (game_id) => {
             this.game_id = game_id;
             this.tag = '';
             this.start_time = '';
@@ -229,7 +340,7 @@
             this.getImage();
         };
         // 通过查询条件加载图片
-        this.loadFromCondition = function (tag, start_time, end_time, keywords) {
+        this.loadFromCondition = (tag, start_time, end_time, keywords) => {
             this.game_id = '';
             this.tag = tag;
             this.start_time = start_time;
@@ -238,35 +349,38 @@
             this.getImage();
         };
         // ajax加载图片并插入到图片墙
-        this.getImage = function () {
-            var that = this;
-            var html = $('');
+        this.getImage = () => {
             $.get(this.api, {
                 game_id: this.game_id,
                 tag: this.tag,
                 start_time: this.start_time,
                 end_time: this.end_time,
                 keywords: this.keywords
-            }, function (data) {
-                for (var key in data) {
-                    html = that.dataToHtml(data[key]);
-                    that.func(html);
+            }, (data) => {
+                for (let key in data) {
+                    this.container.append(this.dataToHtml(data[key]));
                 }
+                this.func();
             });
         };
         // 获取到的json数据转换为html数据
-        this.dataToHtml = function (data) {
-            // {"id": "1", "name": "test", "url": "http:\/\/wwww", "game_id": "1"} --> html
-            var section = $('<section class="box col-md-3 col-sm-4 col-xs-6" image-id="' + data.id + '"></section>');
-            var title = $('<div class="title"><h3>' + data.name + '</h3></div>');
-            var image = $('<img src="' + data.url + '" alt="" title="' + data.name + '" class="img-thumbnail">');
-            var option = $('<div class="option"></div>');
-            var ul = $('<ul></ul>');
-            var remove = $('<li title="删除"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
-            var edit = $('<li title="编辑"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></li>');
-            return section.append(title).append(image).append(option.append(ul.append(remove,edit)));
+        this.dataToHtml = (data) => {
+            // {"id": "1", "name": "test", "url": "http:\/\/your_path", "game_id": "1"} --> html
+            const section = $('<section class="box col-md-3 col-sm-4 col-xs-6"></section>');
+            section.attr('type', data.type);
+            section.attr('game-id', data.game_id);
+            section.attr('image-id', data.id);
+            section.attr('image-name', data.name);
+            section.attr('tags', JSON.stringify(data.tags));
+            const title = $('<div class="title"><h3>' + data.name + '</h3></div>');
+            const image = $('<img src="' + data.url + '" alt="" title="' + data.name + '" class="img-thumbnail">');
+            const option = $('<div class="option"></div>');
+            const ul = $('<ul></ul>');
+            const remove = $('<li title="删除" class="remove"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
+            const edit = $('<li title="编辑" class="edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="modal" data-target="#image-editor"></span></li>');
+            return section.append(title).append(image).append(option.append(ul.append(remove, edit)));
         };
-        this.clear = function () {
+        this.clear = () => {
             this.container.empty();
         }
     }

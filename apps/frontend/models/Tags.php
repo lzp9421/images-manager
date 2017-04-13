@@ -14,6 +14,14 @@ class Tags extends Model
 {
     public function initialize()
     {
+        $this->hasMany(
+            "id",
+            "Multiple\\Frontend\\Models\\ImagesTags",
+            "tag_id",
+            [
+                "alias" => "ImagesTags",
+            ]
+        );
         $this->hasManyToMany(
             "id",
             "Multiple\\Frontend\\Models\\ImagesTags",
