@@ -30,7 +30,7 @@
         <section>
             <h2 class="row">
                 <span class="col-md-2 col-sm-2 col-xs-3">
-                    <input type="file" id="images-upload" multiplehtml>
+                    <input type="file" id="images-upload" multiple accept="image/jpeg,image/png,image/gif,image/bmp" upload-progress="<?= ini_get('session.upload_progress.name') ?>" style="display: none">
                     <button class="btn btn-block btn-primary">上传</button>
                 </span>
                 <span class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
@@ -88,6 +88,23 @@
         </div>
     </div>
 </div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="upload-modal" tabindex="-1" role="dialog" aria-labelledby="UploadModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">上传</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">完成</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->tag->javascriptInclude('statics/jquery/jquery.min.js');?>
 <?= $this->tag->javascriptInclude('statics/bootstrap/js/bootstrap.min.js');?>
 <?= $this->tag->javascriptInclude('statics/treeview/bootstrap-treeview.min.js');?>
@@ -96,11 +113,60 @@
 <?= $this->tag->javascriptInclude('statics/imagesLoaded/imagesloaded.pkgd.min.js');?>
 <?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.tag-editor.js');?>
 <?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.caret.min.js');?>
+<?= $this->tag->javascriptInclude('statics/load-image/load-image.all.min.js');?>
 
 <script src="https://cdn.bootcss.com/jquery-infinitescroll/2.0b2.120520/jquery.infinitescroll.min.js"></script>
 
 <script>
 
+    
+    $(() => {
+        $('#images-upload + button').on('click', (event) => {
+            $('#images-upload').val('').trigger('click').one('change', (event) => {
+                const files = $(event.currentTarget).prop('files');
+                const table = $('<table class="table table-hover"></table>');
+                for (let key in files) {
+                    if (!(files[key] instanceof File)) {
+                        continue;
+                    }
+                    let tr = $('<tr></tr>');
+                    let loadingImage = loadImage(
+                        files[key],
+                        function (img) {
+                            tr.append($('<td></td>').html(img));
+                            tr.append($('<td></td>').html(files[key].name));
+                            table.append(tr);
+                        },
+                        {maxWidth: 120}
+                    );
+                    if (!loadingImage) {
+                        console.log('error');
+                    }
+
+                    // 并发上传
+                    let formData = new FormData();
+                    formData.append('file', files[key]);
+                    $.ajax({
+                        url: '/images/upload',
+                        type: 'POST',
+                        cache: false,
+                        data: formData,
+                        processData: false,
+                        contentType: false
+                    }).done(function(res) {
+                        console.log('上传成功');
+                    }).fail(function(res) {
+                        console.log('上传失败');
+                    });
+                }
+                let update_modal = $('#upload-modal');
+                update_modal.find('.modal-body').html(table);
+                update_modal.modal('show');
+            });
+        });
+
+
+    });
     $(() => {
         $.get('tags', {
             type: '足球'
