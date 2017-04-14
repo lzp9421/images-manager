@@ -30,6 +30,7 @@
         <section>
             <h2 class="row">
                 <span class="col-md-2 col-sm-2 col-xs-3">
+                    <input type="file" id="images-upload" multiplehtml>
                     <button class="btn btn-block btn-primary">上传</button>
                 </span>
                 <span class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
@@ -41,7 +42,6 @@
         </section>
     </div>
 </div>
-
 
 <!-- 模态框（Modal） -->
 <div class="modal fade" id="image-editor" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -85,8 +85,8 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 <button type="button" id="update-image" class="btn btn-primary">提交更改</button>
             </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal -->
+        </div>
+    </div>
 </div>
 <?= $this->tag->javascriptInclude('statics/jquery/jquery.min.js');?>
 <?= $this->tag->javascriptInclude('statics/bootstrap/js/bootstrap.min.js');?>
@@ -163,7 +163,9 @@
                 container.masonry('appended', $(image.img).parent('section'));
             });
             imgLoad.on('always', () => {
-                container.viewer();
+                container.viewer({
+                    url: 'data-original'
+                });
                 $('.edit').on('click', (event) => {
                     let tags = JSON.parse($(event.currentTarget).parents('section').attr('tags'));
                     let initial_tags = [];
@@ -373,7 +375,10 @@
             section.attr('image-name', data.name);
             section.attr('tags', JSON.stringify(data.tags));
             const title = $('<div class="title"><h3>' + data.name + '</h3></div>');
-            const image = $('<img src="' + data.url + '" alt="" title="' + data.name + '" class="img-thumbnail">');
+            const image = $('<img alt="" class="img-thumbnail">');
+            image.attr('src', data.thumb);
+            image.attr('title', data.name);
+            image.attr('data-original', data.url);
             const option = $('<div class="option"></div>');
             const ul = $('<ul></ul>');
             const remove = $('<li title="删除" class="remove"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
