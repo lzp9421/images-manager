@@ -1,0 +1,10 @@
+{
+    "require": {
+        "intervention/image": "^2.3"
+    },
+    "autoload": {
+        "files": [
+            "apps/helpers.php"
+        ]
+    }
+}
