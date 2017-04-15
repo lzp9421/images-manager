@@ -75,26 +75,6 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         return @mkdir($dir, $mode);
     }
 
-    public function progressAction()
-    {
-        //ini_get()获取php.ini中环境变量的值
-        $upload_progress_name = ini_get('session.upload_progress.name');
-        //ajax中我们使用的是get方法，变量名称为ini文件中定义的前缀 拼接 传过来的参数
-        $key = ini_get('session.upload_progress.prefix') . $this->request->get($upload_progress_name);
-        //判断 SESSION 中是否有上传文件的信息
-        if (!empty($_SESSION[$key])) {
-            //已上传大小
-            $current = $_SESSION[$key]['bytes_processed'];
-            //文件总大小
-            $total = $_SESSION[$key]['content_length'];
-            //向 ajax 返回当前的上传进度百分比。
-            $progress = $current < $total ? ceil($current / $total * 100) : 100;
-        }else{
-            $progress = 100;
-        }
-        return $this->response->setJsonContent(['status' => 'success', 'progress' => $progress]);
-    }
-
     public function createAction()
     {
 

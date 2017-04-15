@@ -30,7 +30,7 @@
         <section>
             <h2 class="row">
                 <span class="col-md-2 col-sm-2 col-xs-3">
-                    <input type="file" id="images-upload" multiple accept="image/jpeg,image/png,image/gif,image/bmp" upload-progress="<?= ini_get('session.upload_progress.name') ?>" style="display: none">
+                    <input type="file" id="images-upload" multiple accept="image/jpeg,image/png,image/gif,image/bmp" style="display: none">
                     <button class="btn btn-block btn-primary">上传</button>
                 </span>
                 <span class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
@@ -113,7 +113,6 @@
 <?= $this->tag->javascriptInclude('statics/imagesLoaded/imagesloaded.pkgd.min.js');?>
 <?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.tag-editor.js');?>
 <?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.caret.min.js');?>
-<?= $this->tag->javascriptInclude('statics/load-image/load-image.all.min.js');?>
 
 <script src="https://cdn.bootcss.com/jquery-infinitescroll/2.0b2.120520/jquery.infinitescroll.min.js"></script>
 
@@ -121,41 +120,65 @@
 
     
     $(() => {
-        $('#images-upload + button').on('click', (event) => {
-            $('#images-upload').val('').trigger('click').one('change', (event) => {
+
+        const xhrOnProgress = function(fun) {
+            xhrOnProgress.onprogress = fun; //绑定监听
+            //使用闭包实现监听绑
+            return function() {
+                //通过$.ajaxSettings.xhr();获得XMLHttpRequest对象
+                const xhr = $.ajaxSettings.xhr();
+                //判断监听函数是否为函数
+                if (typeof xhrOnProgress.onprogress !== 'function')
+                    return xhr;
+                //如果有监听函数并且xhr对象支持绑定时就把监听函数绑定上去
+                if (xhrOnProgress.onprogress && xhr.upload) {
+                    xhr.upload.onprogress = xhrOnProgress.onprogress;
+                }
+                return xhr;
+            }
+        };
+
+        const image_upload = $('#images-upload');
+        image_upload.siblings('button').on('click', (event) => {
+            image_upload.val('').trigger('click').one('change', (event) => {
                 const files = $(event.currentTarget).prop('files');
-                const table = $('<table class="table table-hover"></table>');
+                const table = $('<table class="table table-responsive table-condensed"></table>');
                 for (let key in files) {
-                    if (!(files[key] instanceof File)) {
+                    // 过滤非文件内容
+                    let file = files[key];
+                    if (!(file instanceof File)) {
                         continue;
                     }
-                    let tr = $('<tr></tr>');
-                    let loadingImage = loadImage(
-                        files[key],
-                        function (img) {
-                            tr.append($('<td></td>').html(img));
-                            tr.append($('<td></td>').html(files[key].name));
-                            table.append(tr);
-                        },
-                        {maxWidth: 120}
-                    );
-                    if (!loadingImage) {
-                        console.log('error');
-                    }
+                    // 载入文件信息及图片预览
+                    let img = $('<img>').attr('src', window.URL.createObjectURL(file)).attr('width', '100%');
+                    let td_image = $('<td></td>').html(img);
+                    let td_file = $('<td></td>').append($('<h5></h5>').text(file.name), $('<p></p>'));
+                    let td_percent = $('<td></td>');
+                    let tr = $('<tr></tr>').append(td_image, td_file, td_percent);
+                    table.append(tr);
 
                     // 并发上传
                     let formData = new FormData();
-                    formData.append('file', files[key]);
+                    formData.append('file', file);
                     $.ajax({
                         url: '/images/upload',
                         type: 'POST',
                         cache: false,
                         data: formData,
                         processData: false,
-                        contentType: false
+                        contentType: false,
+                        xhr: xhrOnProgress(function(e){
+                            // 获取进度
+                            let percent = e.loaded / e.total;//计算百分比
+                            tr.css('background', '#f0f0f0 linear-gradient(to right, #e4f1fb ' + percent * 100 + '%, rgba(0, 0, 0, 0) ' + (percent * 100 + (10 - percent * 10)) + '%)');
+                            td_percent.html((percent * 100).toFixed(0) + '%');
+                            td_file.find('p').text((e.loaded / 1024 / 1024).toFixed(2) + 'MB / ' + (e.total / 1024 / 1024).toFixed(2) + 'MB');
+                            console.log(e);
+                        })
                     }).done(function(res) {
                         console.log('上传成功');
                     }).fail(function(res) {
+                        tr.css('background', '#f2dede');
                         console.log('上传失败');
                     });
                 }
@@ -238,9 +261,7 @@
                     for (let tag of tags) {
                         initial_tags.push(tag.name);
                     }
-                    $('#tags-editor').tagEditor('destroy');
-                    $('#tags-editor').val('');
-                    $('#tags-editor').tagEditor({
+                    $('#tags-editor').tagEditor('destroy').val('').tagEditor({
                         initialTags: initial_tags,
                         delimiter: ', ',
                         placeholder: '输入或选择标签，输入多个标签以空格分割'

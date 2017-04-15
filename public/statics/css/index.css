@@ -88,3 +88,23 @@
 .tags-label input:checked + span.label{
     background: #5cb85c;
 }
+
+/*上传框*/
+#upload-modal tr {
+    display: block;
+    margin: 10px 0;
+    overflow: hidden;
+}
+#upload-modal td {
+    display: inline-block;
+    overflow: hidden;
+}
+#upload-modal td:first-child, #upload-modal td:last-child {
+    width: 20%;
+}
+#upload-modal td:nth-child(2) {
+    width: 60%;
+}
+#upload-modal img {
+    width: 100%;
+}
