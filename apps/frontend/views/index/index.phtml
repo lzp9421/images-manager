@@ -83,7 +83,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" id="update-image" class="btn btn-primary">提交更改</button>
+                <button type="button" id="update-image" class="btn btn-primary" data-dismiss="modal">提交更改</button>
             </div>
         </div>
     </div>
@@ -160,6 +160,7 @@
                     // 并发上传
                     let formData = new FormData();
                     formData.append('file', file);
+                    formData.append('game_id', $('#images-wall').attr('game-id'));
                     $.ajax({
                         url: '/images/upload',
                         type: 'POST',
@@ -167,6 +168,7 @@
                         data: formData,
                         processData: false,
                         contentType: false,
+                        dataType: 'json',
                         xhr: xhrOnProgress(function(e){
                             // 获取进度
                             let percent = e.loaded / e.total;//计算百分比
@@ -176,7 +178,12 @@
                             console.log(e);
                         })
                     }).done(function(res) {
-                        console.log('上传成功');
+                        if (res.status === 'success') {
+                            console.log('上传成功');
+                        } else {
+                            tr.css('background', '#f2dede');
+                            console.log('上传失败');
+                        }
                     }).fail(function(res) {
                         tr.css('background', '#f2dede');
                         console.log('上传失败');
@@ -214,13 +221,23 @@
 
         // 提交图片信息修改
         $('#update-image').on('click', () => {
+            let id = $('#image-id').val();
+            let name = $('#image-name').val();
+            let game_id = $('#image-game_id').val();
+            let tags = $('#tags-editor').tagEditor('getTags')[0].tags;
+            console.log(tags);
             $.post('images/update', {
-                id: $('#image-id').val(),
-                name: $('#image-name').val(),
-                game_id: $('#image-game_id').val(),
-                tag_names: $('#tags-editor').tagEditor('getTags')[0].tags
+                id: id,
+                name: name,
+                game_id: game_id,
+                tags: tags
             }, (data) => {
-                console.log(data);
+                const container = $('#images-wall');
+                const image_id = $('#image-id');
+
+                console.log(tags);
+                container.find('section[image-id="' + image_id.val() + '"]').attr('image-tags', JSON.stringify(tags));
+                container.find('section[image-id="' + image_id.val() + '"]').attr('image-name', name);
             });
         });
 
@@ -256,13 +273,9 @@
                     url: 'data-original'
                 });
                 $('.edit').on('click', (event) => {
-                    let tags = JSON.parse($(event.currentTarget).parents('section').attr('tags'));
-                    let initial_tags = [];
-                    for (let tag of tags) {
-                        initial_tags.push(tag.name);
-                    }
+                    let tags = JSON.parse($(event.currentTarget).parents('section').attr('image-tags'));
                     $('#tags-editor').tagEditor('destroy').val('').tagEditor({
-                        initialTags: initial_tags,
+                        initialTags: tags,
                         delimiter: ', ',
                         placeholder: '输入或选择标签，输入多个标签以空格分割'
                     });
@@ -298,7 +311,8 @@
                         wall.clear();
                         container.masonry('destroy');
                         container.masonry(options);
-                        wall.loadFromGame(data.game_id)
+                        wall.loadFromGame(data.game_id);
+                        container.attr('game-id', data.game_id);
                     }
                 }
             });
@@ -306,6 +320,7 @@
         // 获取菜单并显示
         tree.refresh();
         wall.loadFromGame(1);
+        container.attr('game-id', 1);
 
     });
 
@@ -460,7 +475,9 @@
             section.attr('game-id', data.game_id);
             section.attr('image-id', data.id);
             section.attr('image-name', data.name);
-            section.attr('tags', JSON.stringify(data.tags));
+            section.attr('image-tags', JSON.stringify(data.tags.map(function (tag) {
+                return tag.name;
+            })));
             const title = $('<div class="title"><h3>' + data.name + '</h3></div>');
             const image = $('<img alt="" class="img-thumbnail">');
             image.attr('src', data.thumb);

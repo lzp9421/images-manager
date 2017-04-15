@@ -5,6 +5,7 @@ namespace Multiple\Frontend\Controllers;
 use Multiple\Frontend\Models\Games;
 use Multiple\Frontend\Models\Images;
 use Multiple\Frontend\Models\Tags;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class ImagesController extends BaseController
 {
@@ -49,12 +50,12 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         if (!$this->request->hasFiles()) {
             $this->response->setJsonContent(['status' => 'error', 'data' => '没有需要上传的文件']);
         }
+        $game_id = $this->request->getPost('game_id', 'int');
         $files = $this->request->getUploadedFiles();
         $result = [];
         foreach ($files as $file) {
             // echo $file->getName(), " ", $file->getSize(), "\n";
             // 白名单过滤图片拓展名
-            $name = $file->getName();
             $white_list = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp'];
             $file_type = strtolower($file->getType());
             if (!in_array($file_type, $white_list)) {
@@ -62,17 +63,27 @@ DELETE	/photo/{photo}	destroy	photo.destroy
             }
             // Move the file into the application
             $storage = './storage/images/' . (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d') . '/';
-            $this->mkdirs($storage);
-            $result[$name] = $file->moveTo($storage . uniqid() . '.' . pathinfo($name, PATHINFO_EXTENSION));
+            $file_name = $file->getName();
+            $file_uuid = uniqid();
+            $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+            $new_file_name = $storage . $file_uuid . '.' . $file_ext;
+            $thumb_name = $storage . $file_uuid . '_thumb.' . $file_ext;
+            mkdirs($storage);
+            $result[$file_name] = $file->moveTo($new_file_name);
+            // 生成缩略图
+            $image = Image::make($new_file_name);
+            $image->fit(300);
+            // 打水印
+            // $image->insert('public/watermark.png');
+            // 保存缩略图
+            $image->save($thumb_name);
+            try {
+                $this->store($file_name, $game_id, $new_file_name, $thumb_name);
+            } catch (\Exception $e) {
+                return $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
+            }
         }
         return $this->response->setJsonContent(['status' => 'success', 'data' => $result]);
-    }
-
-    private function mkdirs($dir, $mode = 0777)
-    {
-        if (is_dir($dir) || @mkdir($dir, $mode)) return TRUE;
-        if (!$this->mkdirs(dirname($dir), $mode)) return FALSE;
-        return @mkdir($dir, $mode);
     }
 
     public function createAction()
@@ -82,7 +93,33 @@ DELETE	/photo/{photo}	destroy	photo.destroy
 
     public function storeAction()
     {
+        $name = $this->request->get('name') ?: '未命名 ';
+    }
 
+    private function store($name, $game_id, $url, $thumb, $tags = []) {
+        $game = Games::findFirst([
+            'conditions' => 'id = ?1',
+            'bind' => [
+                1 => $game_id,
+            ],
+        ]);
+        if (!$game) {
+            throw new \Exception('指定比赛不存在');
+        }
+        $image = new Images;
+        $image->name = $name;
+        $image->game = $game;
+        $image->url = $url;
+        $image->thumb = $thumb;
+        $image->tags = array_map(function ($tag) {
+            return Tags::findFirst([
+                'conditions' => 'id=?1',
+                'bind' => [
+                    1 => $tag,
+                ],
+            ]);
+        }, $tags) ?: null;
+        $image->save();
     }
 
     public function showAction()
@@ -105,7 +142,7 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         $name = $this->request->getPost('name', 'string');
         //$url = filter_var($this->request->getPost('url'),FILTER_VALIDATE_URL);
         $game_id = $this->request->getPost('game_id', 'int');
-        $tag_names = (array)$this->request->getPost('tag_names');
+        $tags = (array)$this->request->getPost('tags');
         // 验证
         //$url || $error[] = 'URL不合法';
         $game = Games::findFirst(["id='${game_id}'"]);
@@ -120,17 +157,16 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         $image->game = $game;
         $image->name = $name;
         //$image->url = $url;
-        foreach ($tag_names as $tag_name) {
-            $tag = Tags::findFirst([
+
+        $image->imagesTags->delete();
+        $image->tags = array_map(function ($tag) {
+            return Tags::findFirst([
                 'conditions' => 'name=?1',
                 'bind' => [
-                    1 => $tag_name,
+                    1 => $tag,
                 ],
             ]);
-            $tag && $tags[] = $tag;
-        }
-        $image->imagesTags->delete();
-        empty($tags) || $image->tags = $tags;
+        }, $tags) ?: null;
         $result = $image->save();
         if (!$result) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);

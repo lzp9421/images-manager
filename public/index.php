@@ -66,6 +66,6 @@ class Application extends BaseApplication
 
     }
 }
-
+require_once '../vendor/autoload.php';
 $application = new Application();
 $application->main();
