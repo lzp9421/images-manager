@@ -59,6 +59,14 @@
 #images-wall section.box li:hover {
     color: #c9302c;
 }
+#images-wall section.box li.choose {
+    position:absolute;
+    top:0;
+    left:20px;
+}
+#images-wall section.box li.choose:hover {
+    color: #c9302c;
+}
 #images-wall section.box h3 {
     font-size: 14px;
     font-weight: normal;
@@ -108,3 +116,5 @@
 #upload-modal img {
     width: 100%;
 }
+
+/*搜索*/
