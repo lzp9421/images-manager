@@ -125,7 +125,7 @@
             </div>
             <div class="modal-body"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">完成</button>
+                <button type="button" class="finish btn btn-primary" data-dismiss="modal" aria-hidden="true">完成</button>
             </div>
         </div>
     </div>
@@ -366,25 +366,36 @@
             container.trigger('click');
         });
 
+        // 刷新图片墙
+        let refresh = (game_id) => {
+            wall.clear();
+            container.masonry('destroy');
+            container.masonry(options);
+            wall.loadFromGame(game_id);
+            container.attr('game-id', game_id);
+        };
+
         // 建立树形菜单
         const tree = new Tree((view) => {
             $('#tree').treeview({
                 data: view,
                 onNodeSelected: (event, data) => {
                     if (typeof (data.game_id) !== 'undefined') {
-                        wall.clear();
-                        container.masonry('destroy');
-                        container.masonry(options);
-                        wall.loadFromGame(data.game_id);
-                        container.attr('game-id', data.game_id);
+                        refresh(data.game_id);
                     }
                 }
             });
         });
         // 获取菜单并显示
-        tree.refresh();
-        wall.loadFromGame(1);
-        container.attr('game-id', 1);
+        tree.show();
+        let game_id = 1;
+        wall.loadFromGame(game_id);
+        container.attr('game-id', game_id);
+
+        // 注册上传图自动刷新的事件
+        $('#upload-modal .finish').on('click', (event) => {
+            refresh(container.attr('game-id'));
+        });
 
     });
 
@@ -417,7 +428,7 @@
             return fmt;
         };
 
-        this.refresh = (tag, start_time, end_time, keywords) => {
+        this.show = (tag, start_time, end_time, keywords) => {
             tag && (this.tag = tag);
             start_time && (this.start_time = start_time);
             end_time && (this.end_time = end_time);
