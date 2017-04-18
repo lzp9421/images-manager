@@ -362,6 +362,10 @@
                         default:
                     }
                 });
+                // 点击删除按钮
+                $('.remove').on('click', (event) => {
+                    alert('删除');
+                });
             });
             container.trigger('click');
         });
@@ -385,15 +389,15 @@
                     }
                 }
             });
+            let game_id = container.attr('game-id');
+            wall.loadFromGame(game_id);
+            container.attr('game-id', game_id);
         });
         // 获取菜单并显示
         tree.show();
-        let game_id = 1;
-        wall.loadFromGame(game_id);
-        container.attr('game-id', game_id);
 
         // 注册上传图自动刷新的事件
-        $('#upload-modal .finish').on('click', (event) => {
+        $('#upload-modal').find('button.finish').on('click', (event) => {
             refresh(container.attr('game-id'));
         });
 
@@ -401,6 +405,7 @@
 
     // 树形菜单
     function Tree(func) {
+        const container = $('#images-wall');
         this.func = func;
         this.api = 'games';
         this.tag = '';
@@ -473,17 +478,32 @@
         this.year = d.Format('yyyy年');
         this.month = d.Format('M月');
         this.date = d.Format('yyyy-MM-dd');
+        let lock = 0;
+        let currentlock = 1;
         this.toView = (tree) => {
             const view = [];
             for (let key in tree) {
                 if (typeof (tree[key]) === 'object') {
                     // 继续迭代
                     if (this.year === key || this.month === key || this.date === key) {
-                        view.push({text: key, state:{expanded:true, checked: true}, nodes: this.toView(tree[key])});
+                        let state = {expanded:true};
+                        if (this.month === key || this.date === key) {
+                            if (this.date === key) {
+                                state.selected = true;
+                                if (currentlock < 4)currentlock = 4;
+                            }
+                            if (currentlock < 3)currentlock = 3;
+                        }
+                        view.push({text: key, state:state, nodes: this.toView(tree[key])});
+                        if (currentlock < 2)currentlock = 2;
                     } else {
                         view.push({text: key, nodes: this.toView(tree[key])});
                     }
                 } else {
+                    if (currentlock > lock) {
+                        container.attr('game-id', tree[key]);
+                        lock = currentlock;
+                    }
                     view.push({text: key, game_id: tree[key]});
                 }
             }

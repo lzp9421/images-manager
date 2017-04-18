@@ -13,8 +13,7 @@ class GamesController extends BaseController
         $dates = Games::find([
             // 'conditions' => '',
         ]);
-        $this->response->setJsonContent($dates);
-        return $this->response;
+        return $this->response->setJsonContent($dates);
     }
 
     public function getGamesAction()
@@ -32,5 +31,24 @@ class GamesController extends BaseController
         ]);
         $this->response->setJsonContent($games);
         return $this->response;
+    }
+
+    /**
+     * 添加一条赛事
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
+     */
+    public function createAction()
+    {
+        $date = $this->request->get('date');
+        $name = $this->request->get('name', 'string');
+        $type = $this->request->get('type', 'string');
+        $game = new Games;
+        $game->name = $name;
+        $game->date = (new \DateTime($date, new \DateTimeZone('PRC')))->format('Y-m-d');
+        $game->type = $type === '足球' ? '足球' : '篮球' ;
+        if (!$game->save()) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => $game->getMessages()]);
+        }
+        return $this->response->setJsonContent(['status' => 'success']);
     }
 }

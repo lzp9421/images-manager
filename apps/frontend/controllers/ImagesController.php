@@ -27,6 +27,7 @@ DELETE	/photo/{photo}	destroy	photo.destroy
             'bind' => [
                 1 => $game_id,
             ],
+            'order' => 'updated_at DESC',
         ]);
         $result = [];
         foreach ($images as $image) {
@@ -119,6 +120,7 @@ DELETE	/photo/{photo}	destroy	photo.destroy
                 ],
             ]);
         }, $tags) ?: null;
+        $image->updated_at = $image->created_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
         $image->save();
     }
 
@@ -167,6 +169,7 @@ DELETE	/photo/{photo}	destroy	photo.destroy
                 ],
             ]);
         }, $tags) ?: null;
+        $image->updated_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
         $result = $image->save();
         if (!$result) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);
