@@ -225,6 +225,10 @@
         // 生成标签
         let createTags = (obj, tags) => {
             for (let tag of tags) {
+                if (tag.name == '|') {
+                    obj.append('<hr>');
+                    continue;
+                }
                 let label = $('<label>').attr('for', 'tag-' + tag.id);
                 let checkbox = $('<input type="checkbox" id="tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
                 let span = $('<span>').addClass('label label-info').text(tag.name);
