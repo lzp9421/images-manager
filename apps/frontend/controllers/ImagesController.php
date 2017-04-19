@@ -179,6 +179,18 @@ DELETE	/photo/{photo}	destroy	photo.destroy
 
     public function destroyAction()
     {
-        
+        $ids = (array)$this->request->get('ids', 'int');
+        $images = Images::find([
+            'conditions' => 'id IN({ids:array})',
+            'bind' => [
+                'ids' => $ids,
+            ],
+        ]);
+        // 删除标签关联关系
+        foreach ($images as $image) {
+            $image->imagesTags->delete();
+        }
+        $images->delete();
+        // 删除图片记录
     }
 }

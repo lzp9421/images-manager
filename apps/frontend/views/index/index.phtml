@@ -8,6 +8,7 @@
     <?= $this->tag->stylesheetLink('statics/treeview/bootstrap-treeview.min.css'); ?>
     <?= $this->tag->stylesheetLink('statics/viewer/viewer.min.css'); ?>
     <?= $this->tag->stylesheetLink('statics/tagEditor/css/jquery.tag-editor.css'); ?>
+    <?= $this->tag->stylesheetLink('statics/sweetalert/sweetalert.css'); ?>
     <?= $this->tag->stylesheetLink('statics/css/index.css'); ?>
     <title>图片管理系统</title>
 </head>
@@ -139,6 +140,7 @@
 <?= $this->tag->javascriptInclude('statics/imagesLoaded/imagesloaded.pkgd.min.js');?>
 <?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.tag-editor.js');?>
 <?= $this->tag->javascriptInclude('statics/tagEditor/js/jquery.caret.min.js');?>
+<?= $this->tag->javascriptInclude('statics/sweetalert/sweetalert.min.js');?>
 
 <script src="https://cdn.bootcss.com/jquery-infinitescroll/2.0b2.120520/jquery.infinitescroll.min.js"></script>
 
@@ -368,7 +370,31 @@
                 });
                 // 点击删除按钮
                 $('.remove').on('click', (event) => {
-                    alert('删除');
+                    let section = $(event.currentTarget).closest('section');
+                    swal({
+                        title: '确定要删除该图片吗？',
+                        text: section.attr('image-name'),
+                        showCancelButton: true,
+                        confirmButtonColor: '#DD6B55',
+                        confirmButtonText: '确定删除',
+                        cancelButtonText: '取消',
+                        closeOnConfirm: false,
+                        imageUrl: section.find('img').attr('src')
+                    }, () => {
+                        $.post('images/destroy', {
+                            ids: [
+                                section.attr('image-id')
+                            ]
+                        }, (data) => {
+                            section.remove();
+                            swal({
+                                title: '删除成功',
+                                text: '图片' + section.attr('image-name') + '以成功从服务器删除',
+                                type: 'success',
+                                timer: 1000
+                            });
+                        });
+                    });
                 });
             });
             container.trigger('click');
@@ -577,7 +603,7 @@
             section.attr('image-tags', JSON.stringify(data.tags.map(function (tag) {
                 return tag.name;
             })));
-            const title = $('<div>').addClass('title').html($('h3').text(data.name));
+            const title = $('<div>').addClass('title').html($('<h3>').text(data.name));
             const image = $('<img>').addClass('img-thumbnail');
             image.attr('src', data.thumb);
             image.attr('title', data.name);
@@ -586,7 +612,7 @@
             const ul = $('<ul>');
             const remove = $('<li title="删除" class="remove"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
             const edit = $('<li title="编辑" class="edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="modal" data-target="#image-editor"></span></li>');
-            return section.append(title).append(image).append(option.append(ul.append(remove, edit)));
+            return section.append(title, image, option.append(ul.append(remove, edit)));
         };
         this.clear = () => {
             this.container.empty();
