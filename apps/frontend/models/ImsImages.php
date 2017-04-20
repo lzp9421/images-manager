@@ -4,7 +4,7 @@ namespace Multiple\Frontend\Models;
 
 use Phalcon\Mvc\Model;
 
-class Images extends Model
+class ImsImages extends Model
 {
 
     public function initialize()
@@ -12,7 +12,7 @@ class Images extends Model
 
         $this->belongsTo(
             "game_id",
-            "Multiple\\Frontend\\Models\\Games",
+            "Multiple\\Frontend\\Models\\ImsGames",
             "id",
             [
                 "alias" => "Game",
@@ -20,7 +20,7 @@ class Images extends Model
         );
         $this->hasMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImagesTags",
+            "Multiple\\Frontend\\Models\\ImsImagesTags",
             "image_id",
             [
                 "alias" => "ImagesTags",
@@ -28,9 +28,9 @@ class Images extends Model
         );
         $this->hasManyToMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImagesTags",
+            "Multiple\\Frontend\\Models\\ImsImagesTags",
             "image_id", "tag_id",
-            "Multiple\\Frontend\\Models\\Tags",
+            "Multiple\\Frontend\\Models\\ImsTags",
             "id",
             [
                 "alias" => "Tags",

@@ -2,7 +2,7 @@
 
 namespace Multiple\Frontend\Controllers;
 
-use Multiple\Frontend\Models\Tags;
+use Multiple\Frontend\Models\ImsTags as Tags;
 
 class TagsController extends BaseController
 {

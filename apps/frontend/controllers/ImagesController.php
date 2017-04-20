@@ -2,12 +2,10 @@
 
 namespace Multiple\Frontend\Controllers;
 
-use Multiple\Frontend\Models\Games;
-use Multiple\Frontend\Models\Images;
-use Multiple\Frontend\Models\Tags;
+use Multiple\Frontend\Models\ImsGames as Games;
+use Multiple\Frontend\Models\ImsImages as Images;
+use Multiple\Frontend\Models\ImsTags as Tags;
 use Intervention\Image\ImageManagerStatic as Image;
-use Phalcon\Mvc\Model\Transaction\Failed as TxFailed;
-use Phalcon\Mvc\Model\Transaction\Manager as TxManager;
 
 class ImagesController extends BaseController
 {
@@ -92,6 +90,11 @@ class ImagesController extends BaseController
      */
     public function createAction()
     {
+        $token = $this->request->get('token');
+        $key = '';
+        if (!password_verify($key, $token)) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => 'unauthorized']);
+        }
         $name = $this->request->get('name') ?: '未命名 ';
         $game_name = $this->request->get('game');
         $url = $this->request->get('url');

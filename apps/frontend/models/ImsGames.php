@@ -10,13 +10,13 @@ namespace Multiple\Frontend\Models;
 
 use Phalcon\Mvc\Model;
 
-class Games extends Model
+class ImsGames extends Model
 {
     public function initialize()
     {
         $this->hasMany(
             "id",
-            "Multiple\\Frontend\\Models\\Images",
+            "Multiple\\Frontend\\Models\\ImsImages",
             "game_id",
             [
                 "alias" => "Images",

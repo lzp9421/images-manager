@@ -10,13 +10,13 @@ namespace Multiple\Frontend\Models;
 
 use Phalcon\Mvc\Model;
 
-class Tags extends Model
+class ImsTags extends Model
 {
     public function initialize()
     {
         $this->hasMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImagesTags",
+            "Multiple\\Frontend\\Models\\ImsImagesTags",
             "tag_id",
             [
                 "alias" => "ImagesTags",
@@ -24,9 +24,9 @@ class Tags extends Model
         );
         $this->hasManyToMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImagesTags",
+            "Multiple\\Frontend\\Models\\ImsImagesTags",
             "tag_id", "image_id",
-            "Multiple\\Frontend\\Models\\Images",
+            "Multiple\\Frontend\\Models\\ImsImages",
             "id",
             [
                 "alias" => "Images",

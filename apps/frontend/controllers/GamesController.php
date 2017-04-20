@@ -2,7 +2,7 @@
 
 namespace Multiple\Frontend\Controllers;
 
-use Multiple\Frontend\Models\Games;
+use Multiple\Frontend\Models\ImsGames as Games;
 
 class GamesController extends BaseController
 {
@@ -40,6 +40,11 @@ class GamesController extends BaseController
      */
     public function createAction()
     {
+        $token = $this->request->get('token');
+        $key = '';
+        if (!password_verify($key, $token)) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => 'unauthorized']);
+        }
         $date = $this->request->get('date');
         $name = $this->request->get('name', 'string');
         $type = $this->request->get('type', 'string');

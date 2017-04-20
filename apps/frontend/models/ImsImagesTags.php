@@ -10,7 +10,7 @@ namespace Multiple\Frontend\Models;
 
 use Phalcon\Mvc\Model;
 
-class ImagesTags extends Model
+class ImsImagesTags extends Model
 {
 
     public function initialize()
@@ -18,7 +18,7 @@ class ImagesTags extends Model
 
         $this->belongsTo(
             "image_id",
-            "Multiple\\Frontend\\Models\\Images",
+            "Multiple\\Frontend\\Models\\ImsImages",
             "id",
             [
                 "alias" => "Images",
@@ -27,7 +27,7 @@ class ImagesTags extends Model
 
         $this->belongsTo(
             "tag_id",
-            "Multiple\\Frontend\\Models\\Tags",
+            "Multiple\\Frontend\\Models\\ImsTags",
             "id",
             [
                 "alias" => "Tags",
