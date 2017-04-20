@@ -70,7 +70,9 @@ DELETE	/photo/{photo}	destroy	photo.destroy
             $new_file_name = $storage . $file_uuid . '.' . $file_ext;
             $thumb_name = $storage . $file_uuid . '_thumb.' . $file_ext;
             mkdirs($storage);
-            $result[$file_name] = $file->moveTo($new_file_name);
+            if (!$file->moveTo($new_file_name)) {
+                return $this->response->setJsonContent(['status' => 'error', 'data' => '图片保存失败']);
+            }
             // 生成缩略图
             $image = Image::make($new_file_name);
             $image->fit(300);
@@ -79,7 +81,10 @@ DELETE	/photo/{photo}	destroy	photo.destroy
             // 保存缩略图
             $image->save($thumb_name);
             try {
-                $this->store($file_name, $game_id, $new_file_name, $thumb_name);
+                $image = $this->store($file_name, $game_id, $new_file_name, $thumb_name);
+                $result[$file_name] = $image->toArray();
+                $result[$file_name]['tags'] = $image->getTags()->toArray();
+                $result[$file_name]['game'] = $image->getGame()->toArray();
             } catch (\Exception $e) {
                 return $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
             }
@@ -122,6 +127,7 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         }, $tags) ?: null;
         $image->updated_at = $image->created_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
         $image->save();
+        return $image;
     }
 
     public function showAction()
