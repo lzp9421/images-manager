@@ -84,7 +84,7 @@
                     <input type="hidden" id="image-id">
                     <div class="form-group row">
                         <div class="col-md-2 col-sm-2 col-xs-3 text-right">
-                            <label for="name" class="form-control-static">名称</label>
+                            <label for="image-name" class="form-control-static">名称</label>
                         </div>
                         <div class="col-md-10 col-sm-10 col-xs-9">
                             <input type="text" id="image-name" class="form-control" placeholder="支持输入图片名称，必填，1~50个汉字">
@@ -92,7 +92,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-md-2 col-sm-2 col-xs-3 text-right">
-                            <label for="name" class="form-control-static">标签</label>
+                            <label for="tags-editor" class="form-control-static">标签</label>
                         </div>
                         <div class="col-md-10 col-sm-10 col-xs-9">
                             <input type="text" id="tags-editor">
@@ -150,7 +150,7 @@
         // 生成标签
         let createTags = (obj, tags) => {
             for (let tag of tags) {
-                if (tag.name == '|') {
+                if (tag.name === '|') {
                     obj.append('<hr>');
                     continue;
                 }
@@ -193,10 +193,16 @@
                 game_id: game_id,
                 tags: tags
             }, (data) => {
-                const container = $('#images-wall');
-                const image_id = $('#image-id');
-                container.find('section[image-id="' + image_id.val() + '"]').attr('image-tags', JSON.stringify(tags));
-                container.find('section[image-id="' + image_id.val() + '"]').attr('image-name', name);
+                const image_id = $('#image-id').val();
+                const section = $('section[image-id="' + image_id + '"]');
+                section.attr('image-tags', JSON.stringify(tags));
+                section.attr('image-name', name);
+                section.find('.title h3').text(name);
+                swal({
+                    title: '修改成功',
+                    type: 'success',
+                    timer: 800
+                });
             });
         });
 
@@ -329,6 +335,7 @@
                 container.viewer({
                     url: 'data-original'
                 });
+                container.viewer('update');
                 regEdit($('.edit'));
                 regRemove($('.remove'));
             });
@@ -360,11 +367,6 @@
         });
         // 获取菜单并显示
         tree.show();
-
-        // 注册上传图自动刷新的事件
-        //$('#upload-modal').find('button.finish').on('click', (event) => {
-        //    refresh(container.attr('game-id'));
-        //});
 
         $(() => {
 
@@ -435,7 +437,6 @@
                                     game_id: image.game_id,
                                     tags: image.tags,
                                 });
-                                console.log(section);
                                 container.prepend(section);
                                 container.imagesLoaded().done(function(instance) {
                                     // 图片加载后，根据是否加载成功，标记图片样式
@@ -446,6 +447,7 @@
                                 });
                                 regRemove(section.find('.remove'));
                                 regEdit(section.find('.edit'));
+                                container.viewer('update');
                                 console.log('上传成功');
                             } else {
                                 tr.css('background', '#f2dede');

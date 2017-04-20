@@ -6,18 +6,11 @@ use Multiple\Frontend\Models\Games;
 use Multiple\Frontend\Models\Images;
 use Multiple\Frontend\Models\Tags;
 use Intervention\Image\ImageManagerStatic as Image;
+use Phalcon\Mvc\Model\Transaction\Failed as TxFailed;
+use Phalcon\Mvc\Model\Transaction\Manager as TxManager;
 
 class ImagesController extends BaseController
 {
-    /*
-     * GET	/photo	index	photo.index
-GET	/photo/create	create	photo.create
-POST	/photo	store	photo.store
-GET	/photo/{photo}	show	photo.show
-GET	/photo/{photo}/edit	edit	photo.edit
-PUT/PATCH	/photo/{photo}	update	photo.update
-DELETE	/photo/{photo}	destroy	photo.destroy
-     */
 
     public function indexAction()
     {
@@ -92,14 +85,34 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         return $this->response->setJsonContent(['status' => 'success', 'data' => $result]);
     }
 
+    /**
+     * API接口
+     * 创建图片
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
+     */
     public function createAction()
     {
-
+        $name = $this->request->get('name') ?: '未命名 ';
+        $game_name = $this->request->get('game');
+        $url = $this->request->get('url');
+        $tags = $this->request->get('tags');
+        $game = Games::findFirst([
+            'conditions' => 'name = ?1',
+            'bind' => [
+                1 => $game_name,
+            ],
+        ]);
+        if (!$game) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => '比赛不存在，请先建立该场比赛']);
+        }
+        $thumb = $url;
+        $this->store($name, $game->id, $url, $thumb, $tags);
+        return $this->response->setJsonContent(['status' => 'success']);
     }
 
     public function storeAction()
     {
-        $name = $this->request->get('name') ?: '未命名 ';
+
     }
 
     private function store($name, $game_id, $url, $thumb, $tags = []) {
@@ -183,6 +196,9 @@ DELETE	/photo/{photo}	destroy	photo.destroy
         return $this->response->setJsonContent(['status' => 'success']);
     }
 
+    /**
+     * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
+     */
     public function destroyAction()
     {
         $ids = (array)$this->request->get('ids', 'int');
@@ -192,11 +208,26 @@ DELETE	/photo/{photo}	destroy	photo.destroy
                 'ids' => $ids,
             ],
         ]);
-        // 删除标签关联关系
-        foreach ($images as $image) {
-            $image->imagesTags->delete();
+        try {
+            $this->db->begin();
+
+            // 删除标签关联关系
+            foreach ($images as $image) {
+                if (!$image->imagesTags->delete()) {
+                    $this->db->rollback();
+                }
+                unlink($image->thumb);
+                unlink($image->url);
+            }
+            // 删除图片记录
+            if (!$images->delete()) {
+                $this->db->rollback();
+            }
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            return $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
         }
-        $images->delete();
-        // 删除图片记录
+        return $this->response->setJsonContent(['status' => 'success']);
     }
 }

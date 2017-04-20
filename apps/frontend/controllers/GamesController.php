@@ -34,6 +34,7 @@ class GamesController extends BaseController
     }
 
     /**
+     * API接口
      * 添加一条赛事
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
