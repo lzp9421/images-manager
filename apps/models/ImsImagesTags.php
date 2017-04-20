@@ -6,8 +6,6 @@
  * Time: 下午4:40
  */
 
-namespace Multiple\Frontend\Models;
-
 use Phalcon\Mvc\Model;
 
 class ImsImagesTags extends Model
@@ -18,7 +16,7 @@ class ImsImagesTags extends Model
 
         $this->belongsTo(
             "image_id",
-            "Multiple\\Frontend\\Models\\ImsImages",
+            "ImsImages",
             "id",
             [
                 "alias" => "Images",
@@ -27,7 +25,7 @@ class ImsImagesTags extends Model
 
         $this->belongsTo(
             "tag_id",
-            "Multiple\\Frontend\\Models\\ImsTags",
+            "ImsTags",
             "id",
             [
                 "alias" => "Tags",

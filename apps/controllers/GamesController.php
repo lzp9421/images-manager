@@ -1,8 +1,6 @@
 <?php
 
-namespace Multiple\Frontend\Controllers;
-
-use Multiple\Frontend\Models\ImsGames as Games;
+use ImsGames as Games;
 
 class GamesController extends BaseController
 {

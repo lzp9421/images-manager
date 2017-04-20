@@ -1,71 +1,84 @@
 <?php
 
-error_reporting(E_ALL);
-
+use Phalcon\Di;
 use Phalcon\Loader;
+use Phalcon\Mvc\Application;
+use Phalcon\Mvc\View;
 use Phalcon\Mvc\Router;
-use Phalcon\DI\FactoryDefault;
-use Phalcon\Mvc\Application as BaseApplication;
+use Phalcon\Http\Request;
+use Phalcon\Http\Response;
+use Phalcon\Mvc\Dispatcher as MvcDispatcher;
+use Phalcon\Db\Adapter\Pdo\Mysql as Database;
+use Phalcon\Mvc\Model\Manager as ModelManager;
+use Phalcon\Mvc\Model\Metadata\Memory as ModelMetadata;
 
-class Application extends BaseApplication
-{
-    /**
-     * Register the services here to make them general or register in the ModuleDefinition to make them module-specific
-     */
-    protected function registerServices()
-    {
+/**
+ * Very simple MVC structure
+ */
 
-        $di = new FactoryDefault();
+$loader = new Loader();
 
-        $loader = new Loader();
+$loader->registerDirs(
+    [
+        "../apps/controllers/",
+        "../apps/models/",
+    ]
+);
 
-        /**
-         * We're a registering a set of directories taken from the configuration file
-         */
-        $loader
-            ->registerDirs([__DIR__ . '/../apps/library/'])
-            ->register();
+$loader->register();
 
-        // Registering a router
-        $di->set('router', function () {
+$di = new Di();
 
-            $router = new Router();
+// Registering a router
+$di->set("router", Router::class);
 
-            $router->setDefaultModule("frontend");
+// Registering a dispatcher
+$di->set("dispatcher", MvcDispatcher::class);
 
-            $router->add('/:controller/:action', [
-                'module'     => 'frontend',
-                'controller' => 1,
-                'action'     => 2,
-            ])->setName('frontend');
+// Registering a Http\Response
+$di->set("response", Response::class);
 
-            return $router;
-        });
+// Registering a Http\Request
+$di->set("request", Request::class);
 
-        $this->setDI($di);
+// Registering the view component
+$di->set(
+    "view",
+    function () {
+        $view = new View();
+
+        $view->setViewsDir("../apps/views/");
+
+        return $view;
     }
+);
 
-    public function main()
-    {
-
-        $this->registerServices();
-
-        // Register the installed modules
-        $this->registerModules([
-            'frontend' => [
-                'className' => 'Multiple\Frontend\Module',
-                'path'      => '../apps/frontend/Module.php'
-            ],
-        ]);
-
-        try {
-            echo $this->handle()->getContent();
-        } catch (\Exception $e) {
-            var_dump($e);
-        }
-
+$di->set(
+    "db",
+    function () {
+        return new Database(
+            [
+                "host" => "127.0.0.1",
+                "username" => "images",
+                "password" => "secret",
+                "dbname" => "images"
+            ]
+        );
     }
+);
+
+//Registering the Models-Metadata
+$di->set("modelsMetadata", ModelMetadata::class);
+
+//Registering the Models Manager
+$di->set("modelsManager", ModelManager::class);
+
+try {
+    $application = new Application($di);
+
+    $response = $application->handle();
+
+    echo $response->getContent();
+} catch (Exception $e) {
+    echo $e->getMessage();
 }
-require_once '../vendor/autoload.php';
-$application = new Application();
-$application->main();

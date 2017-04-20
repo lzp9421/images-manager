@@ -1,8 +1,6 @@
 <?php
 
-namespace Multiple\Frontend\Controllers;
-
-use Multiple\Frontend\Models\ImsTags as Tags;
+use ImsTags as Tags;
 
 class TagsController extends BaseController
 {

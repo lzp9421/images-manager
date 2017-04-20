@@ -6,8 +6,6 @@
  * Time: 下午4:42
  */
 
-namespace Multiple\Frontend\Models;
-
 use Phalcon\Mvc\Model;
 
 class ImsTags extends Model
@@ -16,7 +14,7 @@ class ImsTags extends Model
     {
         $this->hasMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImsImagesTags",
+            "ImsImagesTags",
             "tag_id",
             [
                 "alias" => "ImagesTags",
@@ -24,9 +22,9 @@ class ImsTags extends Model
         );
         $this->hasManyToMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImsImagesTags",
+            "ImsImagesTags",
             "tag_id", "image_id",
-            "Multiple\\Frontend\\Models\\ImsImages",
+            "ImsImages",
             "id",
             [
                 "alias" => "Images",

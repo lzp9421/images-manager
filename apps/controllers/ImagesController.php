@@ -1,10 +1,8 @@
 <?php
 
-namespace Multiple\Frontend\Controllers;
-
-use Multiple\Frontend\Models\ImsGames as Games;
-use Multiple\Frontend\Models\ImsImages as Images;
-use Multiple\Frontend\Models\ImsTags as Tags;
+use ImsGames as Games;
+use ImsImages as Images;
+use ImsTags as Tags;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class ImagesController extends BaseController

@@ -1,9 +1,7 @@
 <?php
 
-namespace Multiple\Frontend\Controllers;
-
-use Multiple\Frontend\Models\ImsGames as Games;
-use Multiple\Frontend\Models\ImsTags as Tags;
+use ImsGames as Games;
+use ImsTags as Tags;
 
 class IndexController extends BaseController
 {

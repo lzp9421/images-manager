@@ -6,8 +6,6 @@
  * Time: 下午4:43
  */
 
-namespace Multiple\Frontend\Models;
-
 use Phalcon\Mvc\Model;
 
 class ImsGames extends Model
@@ -16,7 +14,7 @@ class ImsGames extends Model
     {
         $this->hasMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImsImages",
+            "ImsImages",
             "game_id",
             [
                 "alias" => "Images",

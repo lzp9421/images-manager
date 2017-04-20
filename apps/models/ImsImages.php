@@ -1,7 +1,5 @@
 <?php
 
-namespace Multiple\Frontend\Models;
-
 use Phalcon\Mvc\Model;
 
 class ImsImages extends Model
@@ -12,7 +10,7 @@ class ImsImages extends Model
 
         $this->belongsTo(
             "game_id",
-            "Multiple\\Frontend\\Models\\ImsGames",
+            "ImsGames",
             "id",
             [
                 "alias" => "Game",
@@ -20,7 +18,7 @@ class ImsImages extends Model
         );
         $this->hasMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImsImagesTags",
+            "ImsImagesTags",
             "image_id",
             [
                 "alias" => "ImagesTags",
@@ -28,9 +26,9 @@ class ImsImages extends Model
         );
         $this->hasManyToMany(
             "id",
-            "Multiple\\Frontend\\Models\\ImsImagesTags",
+            "ImsImagesTags",
             "image_id", "tag_id",
-            "Multiple\\Frontend\\Models\\ImsTags",
+            "ImsTags",
             "id",
             [
                 "alias" => "Tags",
