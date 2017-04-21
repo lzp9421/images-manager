@@ -2,7 +2,7 @@
 
 use ImsTags as Tags;
 
-class TagsController extends BaseController
+class ImsTagsController extends ImsBaseController
 {
 
     public function indexAction()

@@ -3,9 +3,9 @@
 use ImsGames as Games;
 use ImsImages as Images;
 use ImsTags as Tags;
-use Intervention\Image\ImageManagerStatic as Image;
+use Phalcon\Image\Adapter\Gd as Image;
 
-class ImagesController extends BaseController
+class ImsImagesController extends ImsBaseController
 {
 
     public function indexAction()
@@ -52,7 +52,7 @@ class ImagesController extends BaseController
                 continue;
             }
             // Move the file into the application
-            $storage = './storage/images/' . (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d') . '/';
+            $storage = $this->config->server->storage . (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d') . '/';
             $file_name = $file->getName();
             $file_uuid = uniqid();
             $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
@@ -63,8 +63,8 @@ class ImagesController extends BaseController
                 return $this->response->setJsonContent(['status' => 'error', 'data' => '图片保存失败']);
             }
             // 生成缩略图
-            $image = Image::make($new_file_name);
-            $image->fit(300);
+            $image = new Image($new_file_name);
+            $image->resize(300, null, \Phalcon\Image::WIDTH);
             // 打水印
             // $image->insert('public/watermark.png');
             // 保存缩略图

@@ -2,12 +2,41 @@
 
 use ImsGames as Games;
 use ImsTags as Tags;
+use Phalcon\Mvc\Url;
 
-class IndexController extends BaseController
+class ImsController extends ImsBaseController
 {
     public function indexAction()
     {
 
+        $url = new Url();
+
+        // HTML 头部的js资源
+        $headerCollection = $this->assets->collection("header")
+            ->setPrefix($this->config->server->asset)
+            ->addCss('bootstrap/css/bootstrap.min.css')
+            ->addCss('treeview/bootstrap-treeview.min.css')
+            ->addCss('viewer/viewer.min.css')
+            ->addCss('tagEditor/css/jquery.tag-editor.css')
+            ->addCss('sweetalert/sweetalert.css')
+            ->addCss('css/index.css')
+            ->join(true);
+
+        // HTML尾部的js资源
+        $footerCollection = $this->assets->collection("footer")
+            ->setPrefix($this->config->server->asset)
+            ->addJs('jquery/jquery.min.js')
+            ->addJs('bootstrap/js/bootstrap.min.js')
+            ->addJs('treeview/bootstrap-treeview.min.js')
+            ->addJs('viewer/viewer.min.js')
+            ->addJs('masonry/masonry.pkgd.min.js')
+            ->addJs('imagesLoaded/imagesloaded.pkgd.min.js')
+            ->addJs('tagEditor/js/jquery.tag-editor.js')
+            ->addJs('tagEditor/js/jquery.caret.min.js')
+            ->addJs('sweetalert/sweetalert.min.js')
+            ->addJs("js/index.js");
+        $url->setBaseUri($this->config->server->domain);
+        $this->view->url = $url;
     }
 
     public function migrateAction($test = null)

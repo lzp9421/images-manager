@@ -2,7 +2,7 @@
 
 use ImsGames as Games;
 
-class GamesController extends BaseController
+class ImsGamesController extends ImsBaseController
 {
 
     public function indexAction()

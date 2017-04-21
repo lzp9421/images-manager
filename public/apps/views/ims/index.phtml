@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <?php $this->assets->outputCss('header') ?>
+    <title>图片管理系统</title>
+</head>
+<body class="container">
+<div class="row">
+    <aside class="col-md-3 visible-md-block visible-lg-block pull-left">
+        <section id="tags" data-api="<?= $url->get('imsTags') ?>">
+            section
+        </section>
+        <nav>
+            <div id="tree" data-api="<?= $url->get('imsGames') ?>"></div>
+        </nav>
+    </aside>
+    <div class="col-md-9 col-sm-12 col-xs-12 pull-right">
+        <header>
+            <form id="search" class="form-inline">
+                <div class="form-group">
+                    <label for="search-image-mane" class="from-control-static">图片名称：</label>
+                    <input type="text" id="search-image-mane" class="form-control" placeholder="不限">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="search-start-time" class="from-control-static">时&#12288;&#12288;间：</label>
+                    <input type="text" id="search-start-time" class="form-control" placeholder="不限">
+                    <span>到</span>
+                    <input type="text" id="search-start-time" class="form-control" placeholder="不限">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="search-football-tags" class="from-control-static">足球标签：</label>
+                    <input type="text" id="search-start-time" class="form-control" placeholder="不限">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="search-nba-tags" class="from-control-static">篮球标签：</label>
+                    <input type="text" id="search-start-time" class="form-control" placeholder="不限">
+                </div>
+                <br>
+                <div class="form-group">
+                    <button type="button" id="btn-search" class="btn btn-primary">搜索</button>
+                </div>
+            </form>
+        </header>
+
+        <section>
+            <h2 class="row">
+                <span class="col-md-2 col-sm-2 col-xs-3">
+                    <input type="file" id="images-upload" multiple accept="image/jpeg,image/png,image/gif,image/bmp" style="display: none">
+                    <button class="btn btn-block btn-primary">上传</button>
+                </span>
+                <span class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
+                    <button class="btn btn-block btn-danger">删除</button>
+                </span>
+            </h2>
+            <hr>
+            <div id="images-wall" class="row" data-api="<?= $url->get('imsImages') ?>"></div>
+        </section>
+    </div>
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="image-editor" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编辑图片信息</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="image-game_id">
+                    <input type="hidden" id="image-id">
+                    <div class="form-group row">
+                        <div class="col-md-2 col-sm-2 col-xs-3 text-right">
+                            <label for="image-name" class="form-control-static">名称</label>
+                        </div>
+                        <div class="col-md-10 col-sm-10 col-xs-9">
+                            <input type="text" id="image-name" class="form-control" placeholder="支持输入图片名称，必填，1~50个汉字">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2 col-sm-2 col-xs-3 text-right">
+                            <label for="tags-editor" class="form-control-static">标签</label>
+                        </div>
+                        <div class="col-md-10 col-sm-10 col-xs-9">
+                            <input type="text" id="tags-editor">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-offset-2 col-md-10 col-sm-offset-2 col-sm-10 col-xs-offset-3 col-xs-9">
+                            <div class="panel panel-default">
+                                <div class="panel-body tags-label" id="nba-tags-label" style="display: none"></div>
+                                <div class="panel-body tags-label" id="football-tags-label" style="display: none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="update-image" class="btn btn-primary" data-dismiss="modal">提交更改</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="upload-modal" tabindex="-1" role="dialog" aria-labelledby="UploadModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">上传</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="finish btn btn-primary" data-dismiss="modal" aria-hidden="true">完成</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php $this->assets->outputJs('footer') ?>
+</body>
+</html>
