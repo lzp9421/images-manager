@@ -130,14 +130,22 @@ class ImsImagesController extends ImsBaseController
         $image->game  = $game;
         $image->url   = $url;
         $image->thumb = $thumb;
-        $image->tags  = array_map(function ($tag) {
+        // 自动添加标签
+        $tags  = array_map(function ($tag) {
             return Tags::findFirst([
                 'conditions' => 'name = ?1',
                 'bind' => [
                     1 => $tag,
                 ],
             ]);
-        }, $tags) ?: $image->game->tags;
+        }, $tags);
+        if (!$tags) {
+            $tags = [];
+            foreach ($image->game->tags as $tag) {
+                $tags[] = $tag;
+            }
+        }
+        $image->tags  = $tags;
         $image->updated_at = $image->created_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
         $image->save();
         return $image;
