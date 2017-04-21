@@ -45,7 +45,7 @@ $(() => {
                         type: 'success',
                         timer: 1000
                     });
-                });
+                }, 'json');
             });
         });
     };
@@ -285,12 +285,12 @@ $(() => {
         type: '足球'
     }, (tags) => {
         createTags($('#football-tags-label'), tags);
-    });
+    }, 'json');
     $.get(imstags.attr('data-api'), {
         type: '篮球'
     }, (tags) => {
         createTags($('#nba-tags-label'), tags);
-    });
+    }, 'json');
 
     // 提交图片信息修改
     $('#update-image').on('click', () => {
@@ -314,7 +314,7 @@ $(() => {
                 type: 'success',
                 timer: 800
             });
-        });
+        }, 'json');
     });
 });
 
@@ -371,7 +371,7 @@ function Tree(func) {
                 this.dateToTree(data[key]);
             }
             func();
-        });
+        }, 'json');
     };
     // 将键值对格式数据转换为树形结构数据
     this.dateToTree = (data) => {
@@ -475,7 +475,7 @@ function ImageWall(container, func) {
                 this.container.append(this.dataToHtml(data[key]));
             }
             this.func();
-        });
+        }, 'json');
     };
     // 获取到的json数据转换为html数据
     this.dataToHtml = (data) => {

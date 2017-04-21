@@ -27,7 +27,7 @@ class ImsImagesController extends ImsBaseController
                 'url' => $image->url,
                 'type' => $image->game->type,
                 'game_id' => $image->game_id,
-                'tags' => $image->tags,
+                'tags' => $image->tags->toArray(),
             ];
         }
         $this->response->setJsonContent($result);

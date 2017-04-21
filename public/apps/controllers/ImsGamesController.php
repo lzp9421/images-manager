@@ -11,7 +11,7 @@ class ImsGamesController extends ImsBaseController
         $dates = Games::find([
             // 'conditions' => '',
         ]);
-        return $this->response->setJsonContent($dates);
+        return $this->response->setJsonContent($dates->toArray());
     }
 
     public function getGamesAction()
@@ -27,8 +27,7 @@ class ImsGamesController extends ImsBaseController
             ],
             'columns' => 'id, name',
         ]);
-        $this->response->setJsonContent($games);
-        return $this->response;
+        return $this->response->setJsonContent($games->toArray());
     }
 
     /**

@@ -15,7 +15,6 @@ class ImsTagsController extends ImsBaseController
                 1 => $type,
             ],
         ]);
-        $this->response->setJsonContent($tags);
-        return $this->response;
+        return $this->response->setJsonContent($tags->toArray());
     }
 }
