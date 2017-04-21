@@ -12,14 +12,6 @@ class ImsTags extends Model
 {
     public function initialize()
     {
-        $this->hasMany(
-            "id",
-            "ImsImagesTags",
-            "tag_id",
-            [
-                "alias" => "ImagesTags",
-            ]
-        );
         $this->hasManyToMany(
             "id",
             "ImsImagesTags",
@@ -28,6 +20,34 @@ class ImsTags extends Model
             "id",
             [
                 "alias" => "Images",
+            ]
+        );
+        $this->hasMany(
+            "id",
+            "ImsImagesTags",
+            "tag_id",
+            [
+                "alias" => "ImagesTags",
+            ]
+        );
+
+        //
+        $this->hasManyToMany(
+            'id',
+            'ImsGamesTags',
+            'tag_id', 'game_id',
+            'ImsTags',
+            'id',
+            [
+                'alias' => 'Games',
+            ]
+        );
+        $this->hasMany(
+            "id",
+            "ImsGamesTags",
+            "tag_id",
+            [
+                "alias" => "GamesTags",
             ]
         );
     }

@@ -10,11 +10,9 @@
 <body class="container">
 <div class="row">
     <aside class="col-md-3 visible-md-block visible-lg-block pull-left">
-        <section id="tags" data-api="<?= $url->get('imsTags') ?>">
-            section
-        </section>
+        <section id="labels" class="tags-label" data-api="<?= $url->get('ims_labels') ?>"></section>
         <nav>
-            <div id="tree" data-api="<?= $url->get('imsGames') ?>"></div>
+            <div id="tree" data-api="<?= $url->get('ims_games') ?>"></div>
         </nav>
     </aside>
     <div class="col-md-9 col-sm-12 col-xs-12 pull-right">
@@ -83,7 +81,7 @@
                             <input type="text" id="image-name" class="form-control" placeholder="支持输入图片名称，必填，1~50个汉字">
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row" id="tags" data-api="<?= $url->get('imsTags') ?>">
                         <div class="col-md-2 col-sm-2 col-xs-3 text-right">
                             <label for="tags-editor" class="form-control-static">标签</label>
                         </div>

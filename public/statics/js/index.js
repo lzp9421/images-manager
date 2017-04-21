@@ -231,7 +231,7 @@ $(() => {
                             tags: image.tags,
                         });
                         container.prepend(section);
-                        container.imagesLoaded().done(function(instance) {
+                        section.imagesLoaded().done((instance) => {
                             // 图片加载后，根据是否加载成功，标记图片样式
                             let img = section.find('img');
                             img.removeClass('loading');
@@ -246,7 +246,7 @@ $(() => {
                         tr.css('background', '#f2dede');
                         console.log('上传失败');
                     }
-                }).fail(function(res) {
+                }).fail((res) => {
                     tr.css('background', '#f2dede');
                     console.log('上传失败');
                 });
@@ -316,6 +316,35 @@ $(() => {
             });
         }, 'json');
     });
+
+    let createLabels = (obj, labels) => {
+
+        for (let $label of labels) {
+            let label = $('<label>').attr('for', 'label-' + $label.id);
+            let checkbox = $('<input type="checkbox" id="label-' + $label.id + '" label-id="' + $label.id + '" class="sr-only">');
+            let span = $('<span>').addClass('label label-info').text($label.name);
+            obj.append(label.append(checkbox, span));
+        }
+        obj.find('input[type="checkbox"]').on('change', (event) => {
+            let tag = $(event.currentTarget).siblings('span').text();
+            if ($(event.currentTarget).is(":checked")) {
+                // 选中
+                //$('#tags-editor').tagEditor('addTag', tag);
+            } else {
+                // 未选中
+                //$('#tags-editor').tagEditor('removeTag', tag);
+            }
+        });
+    };
+
+    let labels = $('#labels');
+    $.get(labels.attr('data-api'), {
+
+    }, (data) => {
+        labels.show();
+        createLabels(labels, data);
+    }, 'json');
+
 });
 
 // 树形菜单

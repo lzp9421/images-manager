@@ -82,7 +82,7 @@
 
 /*标签选择框样式*/
 
-.tags-label {
+.tags-label{
     display: none;
     max-height: 360px;
     overflow-y: scroll;
@@ -95,6 +95,13 @@
 }
 .tags-label input:checked + span.label{
     background: #5cb85c;
+}
+
+#labels {
+    margin: 20px auto;
+}
+#labels label {
+    width: 40px;
 }
 
 /*上传框*/

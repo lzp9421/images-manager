@@ -13,11 +13,49 @@ class ImsGames extends Model
     public function initialize()
     {
         $this->hasMany(
-            "id",
-            "ImsImages",
-            "game_id",
+            'id',
+            'ImsImages',
+            'game_id',
             [
-                "alias" => "Images",
+                'alias' => 'Images',
+            ]
+        );
+        //
+        $this->hasManyToMany(
+            'id',
+            'ImsGamesLabels',
+            'game_id', 'label_id',
+            'ImsLabels',
+            'id',
+            [
+                'alias' => 'Labels',
+            ]
+        );
+        $this->hasMany(
+            'id',
+            'ImsGamesLabels',
+            'game_id',
+            [
+                'alias' => 'GamesLabels',
+            ]
+        );
+        //
+        $this->hasManyToMany(
+            'id',
+            'ImsGamesTags',
+            'game_id', 'tag_id',
+            'ImsTags',
+            'id',
+            [
+                'alias' => 'Tags',
+            ]
+        );
+        $this->hasMany(
+            'id',
+            'ImsGamesTags',
+            'game_id',
+            [
+                'alias' => 'GamesTags',
             ]
         );
     }

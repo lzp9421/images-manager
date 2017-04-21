@@ -86,28 +86,27 @@ class ImsImagesController extends ImsBaseController
      * 创建图片
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function createAction()
+    public function createAction($token)
     {
-        $token = $this->request->get('token');
-        $key = '';
-        if (!password_verify($key, $token)) {
+        if (!password_verify($this->config->server->key, $token)) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => 'unauthorized']);
         }
-        $name = $this->request->get('name') ?: '未命名 ';
-        $game_name = $this->request->get('game');
-        $url = $this->request->get('url');
-        $tags = $this->request->get('tags');
+
+        $remote_game_id = $this->request->get('game_id');
+        $name           = $this->request->get('name') ?: '未命名 ';
+        $url            = $this->request->get('url');
+
         $game = Games::findFirst([
-            'conditions' => 'name = ?1',
+            'conditions' => 'remote_game_id = ?1',
             'bind' => [
-                1 => $game_name,
+                1 => $remote_game_id,
             ],
         ]);
         if (!$game) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => '比赛不存在，请先建立该场比赛']);
         }
         $thumb = $url;
-        $this->store($name, $game->id, $url, $thumb, $tags);
+        $this->store($name, $game->id, $url, $thumb);
         return $this->response->setJsonContent(['status' => 'success']);
     }
 
@@ -127,18 +126,18 @@ class ImsImagesController extends ImsBaseController
             throw new \Exception('指定比赛不存在');
         }
         $image = new Images;
-        $image->name = $name;
-        $image->game = $game;
-        $image->url = $url;
+        $image->name  = $name;
+        $image->game  = $game;
+        $image->url   = $url;
         $image->thumb = $thumb;
-        $image->tags = array_map(function ($tag) {
+        $image->tags  = array_map(function ($tag) {
             return Tags::findFirst([
-                'conditions' => 'id=?1',
+                'conditions' => 'name = ?1',
                 'bind' => [
                     1 => $tag,
                 ],
             ]);
-        }, $tags) ?: null;
+        }, $tags) ?: $image->game->tags;
         $image->updated_at = $image->created_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
         $image->save();
         return $image;

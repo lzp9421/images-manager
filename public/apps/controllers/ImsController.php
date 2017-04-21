@@ -52,7 +52,7 @@ class ImsController extends ImsBaseController
             $tag = new Tags;
             $tag->type = '篮球';
             $tag->name = $label;
-            $tag->save();
+            //$tag->save();
         }
 
 
@@ -71,7 +71,7 @@ class ImsController extends ImsBaseController
             $tag = new Tags;
             $tag->type = '足球';
             $tag->name = $zuqiu;
-            $tag->save();
+            //$tag->save();
         }
 
         if ($test === 'test') {
@@ -88,8 +88,8 @@ class ImsController extends ImsBaseController
                 $date = urlencode($val['date']);
                 $name = urlencode($val['name']);
                 $type = urlencode($val['type']);
-                $result = file_get_contents("http://${_SERVER['HTTP_HOST']}/games/create?date=${date}&name=${name}&type=${type}");
-                echo($result);
+                //$result = file_get_contents("http://${_SERVER['HTTP_HOST']}/games/create?date=${date}&name=${name}&type=${type}");
+                //echo($result);
             }
             $football_games = [
                 ['date' => '2017-04-15', 'name' => '美国VS日本', 'type' => '足球'],
@@ -104,8 +104,8 @@ class ImsController extends ImsBaseController
                 $date = urlencode($val['date']);
                 $name = urlencode($val['name']);
                 $type = urlencode($val['type']);
-                $result = file_get_contents("http://${_SERVER['HTTP_HOST']}/games/create?date=${date}&name=${name}&type=${type}");
-                echo($result);
+                //$result = file_get_contents("http://${_SERVER['HTTP_HOST']}/games/create?date=${date}&name=${name}&type=${type}");
+                //echo($result);
             }
         }
         exit;

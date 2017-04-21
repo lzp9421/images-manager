@@ -8,27 +8,27 @@
 
 use Phalcon\Mvc\Model;
 
-class ImsImagesTags extends Model
+class ImsGamesLabels extends Model
 {
 
     public function initialize()
     {
 
         $this->belongsTo(
-            "image_id",
-            "ImsImages",
-            "id",
+            'game_id',
+            'ImsGames',
+            'id',
             [
-                "alias" => "Image",
+                'alias' => 'Game',
             ]
         );
 
         $this->belongsTo(
-            "tag_id",
-            "ImsTags",
-            "id",
+            'label_id',
+            'ImsLabels',
+            'id',
             [
-                "alias" => "Tag",
+                'alias' => 'Label',
             ]
         );
 

@@ -1,12 +1,15 @@
 <?php
 
 use ImsGames as Games;
+use ImsLabels as Labels;
+use ImsTags as Tags;
 
 class ImsGamesController extends ImsBaseController
 {
 
     public function indexAction()
     {
+        $this->request->get('');
         // 按照Type分组返回所有日期
         $dates = Games::find([
             // 'conditions' => '',
@@ -35,20 +38,40 @@ class ImsGamesController extends ImsBaseController
      * 添加一条赛事
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function createAction()
+    public function createAction($token = 'token')
     {
-        $token = $this->request->get('token');
-        $key = '';
-        if (!password_verify($key, $token)) {
+        if (!password_verify($this->config->server->key, $token)) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => 'unauthorized']);
         }
-        $date = $this->request->get('date');
-        $name = $this->request->get('name', 'string');
-        $type = $this->request->get('type', 'string');
+
+        $remote_game_id = $this->request->getPost('game_id', 'int');
+        $name           = $this->request->getPost('name', 'string');
+        $date           = $this->request->get('date');
+        $type           = $this->request->getPost('type', 'string');
+        $labels         = (array)$this->request->getPost('labels', 'string');
+        $tags           = (array)$this->request->getPost('tags', 'string');
+
         $game = new Games;
-        $game->name = $name;
-        $game->date = (new \DateTime($date, new \DateTimeZone('PRC')))->format('Y-m-d');
-        $game->type = $type === '足球' ? '足球' : '篮球' ;
+        $game->remote_game_id = $remote_game_id;
+        $game->name   = $name;
+        $game->date   = (new \DateTime($date, new \DateTimeZone('PRC')))->format('Y-m-d');
+        $game->type   = $type === '足球' ? '足球' : '篮球' ;
+        $game->labels = array_map(function ($label) {
+            return Labels::findFirst([
+                'conditions' => 'name = ?1',
+                'bind' => [
+                    1 => $label,
+                ],
+            ]);
+        }, $labels) ?: null;
+        $game->tags   = array_map(function ($tag) {
+            return Tags::findFirst([
+                'conditions' => 'name = ?1',
+                'bind' => [
+                    1 => $tag,
+                ],
+            ]);
+        }, $tags) ?: null;
         if (!$game->save()) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => $game->getMessages()]);
         }
