@@ -10,11 +10,56 @@ class ImsImagesController extends ImsBaseController
 
     public function indexAction()
     {
+        $type = $this->request->get('type', 'string');
         $game_id = $this->request->get('game_id', 'int');
+        $year = $this->request->get('year', 'int');
+        $month = $this->request->get('month', 'int');
+        $date = $this->request->get('date', 'int');
+
+
+        if ($game_id) {
+            // 赛事ID
+            $conditions[] = 'id = :game_id:';
+            $bind['game_id'] = $game_id;
+        } elseif ($type) {
+            // 类型
+            $conditions[] = 'type = :type:';
+            $bind['type'] = $type;
+            if ($date) {
+                // 类型+（年+月+日）
+                $conditions[] = 'date = :date:';
+                $bind['date'] = $date;
+            } else {
+                // 类型+（年）
+                if ($year) {
+                    $conditions[] = 'YEAR(date) = :year:';
+                    $bind['year'] = $year;
+                    if ($month) {
+                        // 类型+（年+月）
+                        $conditions[] = 'MONTH(date) = :month:';
+                    }
+                }
+            }
+        }
+
+        if (empty($conditions) || empty($bind)) {
+            $games = Games::find()->toArray();
+        } else {
+            $games = Games::find([
+                'conditions' => implode(' AND ', $conditions),
+                'bind'       => $bind,
+                'columns'    => 'id',
+            ])->toArray();
+        }
+        $game_ids = array_map(function ($game) {
+            return $game['id'];
+        }, $games);
+
+
         $images = Images::find([
-            'conditions' => 'game_id = ?1',
+            'conditions' => 'game_id IN({game_ids:array})',
             'bind' => [
-                1 => $game_id,
+                'game_ids' => $game_ids,
             ],
             'order' => 'updated_at DESC',
         ]);

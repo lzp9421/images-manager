@@ -138,26 +138,49 @@ $(() => {
     });
 
     // 刷新图片墙
-    let refresh = (game_id) => {
+    let refresh = (conditions, game_id) => {
         wall.clear();
         container.masonry('destroy');
         container.masonry(options);
-        wall.loadFromGame(game_id);
+        wall.loadFromGame(conditions);
         container.attr('game-id', game_id);
     };
 
     // 建立树形菜单
     const tree = new Tree((view) => {
-        $('#tree').treeview({
+        let tree = $('#tree');
+        tree.treeview({
             data: view,
             onNodeSelected: (event, data) => {
+                let conditions = {};
+                let game_id;
                 if (typeof (data.game_id) !== 'undefined') {
-                    refresh(data.game_id);
+                    conditions.game_id = game_id = data.game_id;
+                }else if (/^20\d{2}\-[01]\d-[0-3]\d$/.test(data.text)) {
+                    conditions.date = data.text;
+                    let month = tree.treeview('getNode', data.parentId);
+                    let year = tree.treeview('getNode', month.parentId);
+                    conditions.type = tree.treeview('getNode', year.parentId).text;
+                    console.log(conditions);
+                } else if (/^[01]?\d月$/.test(data.text)) {
+                    conditions.month = parseInt(data.text);
+                    let year = tree.treeview('getNode', data.parentId);
+                    conditions.year = year.text;
+                    conditions.type = tree.treeview('getNode', year.parentId).text;
+                    console.log(conditions);
+                } else if(/^20\d{2}年$/.test(data.text)) {
+                    conditions.year = parseInt(data.text);
+                    conditions.type = tree.treeview('getNode', data.parentId).text;
+                    console.log(conditions);
+                } else if (/^[足篮]球$/) {
+                    conditions.type = data.text;
+                    console.log(conditions);
                 }
+                refresh(conditions, game_id);
             }
         });
         let game_id = container.attr('game-id');
-        wall.loadFromGame(game_id);
+        wall.loadFromGame(container);
         container.attr('game-id', game_id);
     });
     // 获取菜单并显示
@@ -474,13 +497,15 @@ function ImageWall(container, func) {
     this.end_time = '';
     this.keywords = '';
     // 从比赛id中加载图片
-    this.loadFromGame = (game_id) => {
-        this.game_id = game_id;
-        this.tag = '';
-        this.start_time = '';
-        this.end_time = '';
-        this.keywords = '';
-        this.getImage();
+    this.loadFromGame = (conditions) => {
+        //game_id, type, year, mouth, date
+        this.getImage({
+            game_id: conditions.game_id || null,
+            type: conditions.type || null,
+            year: conditions.year || null,
+            mouth: conditions.mouth || null,
+            date: conditions.date || null,
+        });
     };
     // 通过查询条件加载图片
     this.loadFromCondition = (tag, start_time, end_time, keywords) => {
@@ -492,14 +517,8 @@ function ImageWall(container, func) {
         this.getImage();
     };
     // ajax加载图片并插入到图片墙
-    this.getImage = () => {
-        $.get(this.api, {
-            game_id: this.game_id,
-            tag: this.tag,
-            start_time: this.start_time,
-            end_time: this.end_time,
-            keywords: this.keywords
-        }, (data) => {
+    this.getImage = (data) => {
+        $.get(this.api, data, (data) => {
             for (let key in data) {
                 this.container.append(this.dataToHtml(data[key]));
             }
