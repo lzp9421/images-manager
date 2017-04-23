@@ -49,6 +49,36 @@ $(() => {
             });
         });
     };
+    const regTagschenge = (obj) => {
+        const football_tags = $('#football-tags-search');
+        const nba_tags = $('#nba-tags-search');
+        obj.tagEditor({
+            initialTags: [],
+            delimiter: ', ',
+            placeholder: '输入或选择标签，输入多个标签以空格分割',
+            beforeTagSave: function(field, editor, tags, tag, val) {
+                // Remove tag + tag; add tag + val
+                if (tag) {
+                    // 表示修改，先删除tsgs
+                    nba_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                    football_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                }
+                if (val) {
+                    // 添加
+                    nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
+                    football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
+                }
+            },
+            beforeTagDelete: function(field, editor, tags, val) {
+                // Remove tag + val;
+                // 删除
+                nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
+            }
+        });
+    };
+    regTagschenge($('#football-search, #nba-search'));
+
 
     const regEdit = (obj) => {
         obj.on('click', (event) => {
@@ -281,14 +311,14 @@ $(() => {
     });
 
     // 生成标签
-    let createTags = (obj, tags) => {
+    let createTags = (obj, tags, editor) => {
         for (let tag of tags) {
             if (tag.name === '|') {
                 obj.append('<hr>');
                 continue;
             }
-            let label = $('<label>').attr('for', 'tag-' + tag.id);
-            let checkbox = $('<input type="checkbox" id="tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
+            let label = $('<label>').attr('for', editor.attr('id') + 'tag-' + tag.id);
+            let checkbox = $('<input type="checkbox" id="' + editor.attr('id') + 'tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
             let span = $('<span>').addClass('label label-info').text(tag.name);
             obj.append(label.append(checkbox, span));
         }
@@ -296,10 +326,10 @@ $(() => {
             let tag = $(event.currentTarget).siblings('span').text();
             if ($(event.currentTarget).is(":checked")) {
                 // 选中
-                $('#tags-editor').tagEditor('addTag', tag);
+                editor.tagEditor('addTag', tag);
             } else {
                 // 未选中
-                $('#tags-editor').tagEditor('removeTag', tag);
+                editor.tagEditor('removeTag', tag);
             }
         });
     };
@@ -307,12 +337,25 @@ $(() => {
     $.get(imstags.attr('data-api'), {
         type: '足球'
     }, (tags) => {
-        createTags($('#football-tags-label'), tags);
+        createTags($('#football-tags-label'), tags, $('#tags-editor'));
+        createTags($('#football-tags-search'), tags, $('#football-search'));
+        // let football_tags_search = $('#football-tags-search');
+        // for (let tag of tags) {
+        //     if (tag.name === '|') {
+        //         football_tags_search.append('<hr>');
+        //         continue;
+        //     }
+        //     let label = $('<label>').attr('for', 'secrch-tag-' + tag.id);
+        //     let checkbox = $('<input type="checkbox" id="secrch-tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
+        //     let span = $('<span>').addClass('label label-info').text(tag.name);
+        //     football_tags_search.append(label.append(checkbox, span));
+        // }
     }, 'json');
     $.get(imstags.attr('data-api'), {
         type: '篮球'
     }, (tags) => {
-        createTags($('#nba-tags-label'), tags);
+        createTags($('#nba-tags-label'), tags, $('#tags-editor'));
+        createTags($('#nba-tags-search'), tags, $('#nba-search'));
     }, 'json');
 
     // 提交图片信息修改
@@ -367,6 +410,27 @@ $(() => {
         labels.show();
         createLabels(labels, data);
     }, 'json');
+
+    $('#search-start-time').datetimepicker({
+        format: 'yyyy-mm-dd',
+        minView: 'month',
+        autoclose: true
+    });
+    $('#search-end-time').datetimepicker({
+        format: 'yyyy-mm-dd',
+        minView: 'month',
+        autoclose: true
+    });
+    // 高级搜索
+    $('#conditions-search').on('click', (event) => {
+        $(event.currentTarget).parents('aside').addClass('sr-only');
+        $('#aside-search').removeClass('sr-only');
+    });
+    // 目录树
+    $('#treeview-search').on('click', (event) => {
+        $(event.currentTarget).parents('aside').addClass('sr-only');
+        $('#aside-tree').removeClass('sr-only');
+    });
 
 });
 

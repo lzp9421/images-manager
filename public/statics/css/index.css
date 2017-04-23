@@ -87,6 +87,9 @@
     max-height: 360px;
     overflow-y: scroll;
 }
+#labels {
+    overflow: hidden;
+}
 .tags-label label {
     margin: 2px 6px;
 }

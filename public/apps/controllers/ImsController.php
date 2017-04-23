@@ -18,6 +18,7 @@ class ImsController extends ImsBaseController
             ->addCss('treeview/bootstrap-treeview.min.css')
             ->addCss('viewer/viewer.min.css')
             ->addCss('tagEditor/css/jquery.tag-editor.css')
+            ->addCss('datetimepicker/css/bootstrap-datetimepicker.min.css')
             ->addCss('sweetalert/sweetalert.css')
             ->addCss('css/index.css')
             ->join(true);
@@ -33,6 +34,7 @@ class ImsController extends ImsBaseController
             ->addJs('imagesLoaded/imagesloaded.pkgd.min.js')
             ->addJs('tagEditor/js/jquery.tag-editor.js')
             ->addJs('tagEditor/js/jquery.caret.min.js')
+            ->addJs('datetimepicker/js/bootstrap-datetimepicker.min.js')
             ->addJs('sweetalert/sweetalert.min.js')
             ->addJs("js/index.js");
         $url->setBaseUri($this->config->server->domain);

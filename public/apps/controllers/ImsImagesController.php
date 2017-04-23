@@ -16,6 +16,8 @@ class ImsImagesController extends ImsBaseController
         $month = $this->request->get('month', 'int');
         $date = $this->request->get('date', 'int');
 
+        $name = $this->request->get('name');
+        $start_time = $this->request->get('name');
 
         if ($game_id) {
             // 赛事ID
@@ -55,7 +57,6 @@ class ImsImagesController extends ImsBaseController
             return $game['id'];
         }, $games);
 
-
         $images = Images::find([
             'conditions' => 'game_id IN({game_ids:array})',
             'bind' => [
@@ -77,6 +78,14 @@ class ImsImagesController extends ImsBaseController
         }
         $this->response->setJsonContent($result);
         return $this->response;
+    }
+
+    public function search()
+    {
+        $name = $this->request('name');
+        $start_time = $this->request->get('start_time');
+        $end_time = $this->request->get('end_time');
+        $tags = (array)$this->request->get('tags');
     }
 
     public function uploadAction()
