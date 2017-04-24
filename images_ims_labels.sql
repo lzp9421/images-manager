@@ -1,0 +1,12 @@
+INSERT INTO images.ims_labels (name) VALUES ('篮球');
+INSERT INTO images.ims_labels (name) VALUES ('足球');
+INSERT INTO images.ims_labels (name) VALUES ('其他');
+INSERT INTO images.ims_labels (name) VALUES ('NBA');
+INSERT INTO images.ims_labels (name) VALUES ('CBA');
+INSERT INTO images.ims_labels (name) VALUES ('中超');
+INSERT INTO images.ims_labels (name) VALUES ('英超');
+INSERT INTO images.ims_labels (name) VALUES ('德甲');
+INSERT INTO images.ims_labels (name) VALUES ('西甲');
+INSERT INTO images.ims_labels (name) VALUES ('法甲');
+INSERT INTO images.ims_labels (name) VALUES ('意甲');
+INSERT INTO images.ims_labels (name) VALUES ('全部');

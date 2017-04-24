@@ -38,15 +38,17 @@ class ImsGamesController extends ImsBaseController
      * 添加一条赛事
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function createAction($token = 'token')
+    public function createAction()
     {
-        if (!password_verify($this->config->server->key, $token)) {
-            return $this->response->setJsonContent(['status' => 'error', 'data' => 'unauthorized']);
+        $secret    = $this->request->get('secret');
+        $timestamp = $this->request->get('timestamp');
+        if (!api_verify($secret, $timestamp, $this->config->server->key)) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => '']);
         }
 
         $remote_game_id = $this->request->getPost('game_id', 'int');
         $name           = $this->request->getPost('name', 'string');
-        $date           = $this->request->get('date');
+        $date           = $this->request->getPost('date');
         $type           = $this->request->getPost('type', 'string');
         $labels         = (array)$this->request->getPost('labels', 'string');
         $tags           = (array)$this->request->getPost('tags', 'string');

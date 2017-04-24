@@ -14,3 +14,17 @@ if (!function_exists('mkdirs')) {
         return @mkdir($dir, $mode);
     }
 }
+
+if (!function_exists('api_verify')) {
+    function api_verify($secret, $timestamp, $key)
+    {
+        $time = new DateTime('now', new DateTimeZone('PRC'));
+        if ($time->getTimestamp() - $timestamp > 12 * 3600) {
+            return false;
+        }
+        if (md5($key . $timestamp) !== $secret) {
+            return false;
+        }
+        return true;
+    }
+}

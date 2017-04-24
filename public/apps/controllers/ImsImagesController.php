@@ -178,16 +178,16 @@ class ImsImagesController extends ImsBaseController
             $new_file_name = $storage . $file_uuid . '.' . $file_ext;
             $thumb_name = $storage . $file_uuid . '_thumb.' . $file_ext;
             mkdirs($storage);
-            if (!$file->moveTo($new_file_name)) {
+            if (!$file->moveTo('./' . $new_file_name)) {
                 return $this->response->setJsonContent(['status' => 'error', 'data' => '图片保存失败']);
             }
             // 生成缩略图
-            $image = new Image($new_file_name);
+            $image = new Image('./' . $new_file_name);
             $image->resize(300, null, \Phalcon\Image::WIDTH);
             // 打水印
             // $image->insert('public/watermark.png');
             // 保存缩略图
-            $image->save($thumb_name);
+            $image->save('./' . $thumb_name);
             try {
                 $image = $this->store($file_name, $game_id, $new_file_name, $thumb_name);
                 $result[$file_name] = $image->toArray();
@@ -205,10 +205,12 @@ class ImsImagesController extends ImsBaseController
      * 创建图片
      * @return \Phalcon\Http\Response|\Phalcon\Http\ResponseInterface
      */
-    public function createAction($token)
+    public function createAction()
     {
-        if (!password_verify($this->config->server->key, $token)) {
-            return $this->response->setJsonContent(['status' => 'error', 'data' => 'unauthorized']);
+        $secret    = $this->request->get('secret');
+        $timestamp = $this->request->get('timestamp');
+        if (!api_verify($secret, $timestamp, $this->config->server->key)) {
+            return $this->response->setJsonContent(['status' => 'error', 'data' => '']);
         }
 
         $remote_game_id = $this->request->get('game_id');
