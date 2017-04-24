@@ -468,8 +468,9 @@ $(() => {
 
     let upload_modal = $('#upload-modal');
     upload_modal.find('button.finish').on('click', (event) => {
+        let length = $(event.currentTarget).parents('.modal-content').find('.modal-body tr').length;
         let first_image = container.find('section.box').first();
-        first_image.find('.glyphicon-pencil').trigger('click');
+        length === 1  && first_image.find('.glyphicon-pencil').trigger('click');
     });
 
 });
