@@ -307,21 +307,44 @@ class ImsImagesController extends ImsBaseController
         $image->game = $game;
         $image->name = $name;
         //$image->url = $url;
+//开启事务
+        try {
+            $this->db->begin();
 
-        $image->imagesTags->delete();
-        $image->tags = array_map(function ($tag) {
-            return Tags::findFirst([
-                'conditions' => 'name=?1',
-                'bind' => [
-                    1 => $tag,
-                ],
-            ]);
-        }, $tags) ?: null;
-        $image->updated_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
-        $result = $image->save();
-        if (!$result) {
-            return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);
+            if ($image->imagesTags->delete()) {
+                $this->db->rollback();
+                return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);
+            }
+            $image->tags = array_map(function ($tag_name) use ($image) {
+                $tag = Tags::findFirst([
+                    'conditions' => 'name=?1',
+                    'bind' => [
+                        1 => $tag_name,
+                    ],
+                ]);
+                if (!$tag) {
+                    $tag = new Tags;
+                    $tag->name = $tag_name;
+                    $tag->type = $image->game->type;
+                    if (!$tag->save()) {
+                        $this->db->rollback();
+                        return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);
+                    }
+                }
+                return $tag;
+            }, $tags) ?: null;
+            $image->updated_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
+            $result = $image->save();
+            if (!$result) {
+                $this->db->rollback();
+                return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);
+            }
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            return $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
         }
+
         return $this->response->setJsonContent(['status' => 'success']);
     }
 
