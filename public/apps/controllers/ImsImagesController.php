@@ -311,7 +311,7 @@ class ImsImagesController extends ImsBaseController
         try {
             $this->db->begin();
 
-            if ($image->imagesTags->delete()) {
+            if (!$image->imagesTags->delete()) {
                 $this->db->rollback();
                 return $this->response->setJsonContent(['status' => 'error', 'data' => ['保存失败']]);
             }
