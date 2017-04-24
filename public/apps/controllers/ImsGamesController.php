@@ -9,12 +9,31 @@ class ImsGamesController extends ImsBaseController
 
     public function indexAction()
     {
-        $this->request->get('');
+        $labels_name = (array)$this->request->get('labels', 'string');
         // 按照Type分组返回所有日期
-        $dates = Games::find([
-            // 'conditions' => '',
-        ]);
-        return $this->response->setJsonContent($dates->toArray());
+        if (empty($labels_name)) {
+            $games = Games::find();
+        } else {
+            $labels = Labels::find([
+                'conditions' => 'name IN({labels_name:array})',
+                'bind' => [
+                    'labels_name' => $labels_name,
+                ],
+            ]);
+            $ids = [];
+            foreach ($labels as $label) {
+                $ids = array_unique($ids + array_map(function ($game) {
+                        return $game['id'];
+                    }, $label->games->toArray()));
+            }
+            $games = Games::find([
+                'conditions' => 'id IN({ids:array})',
+                'bind' => [
+                    'ids' => $ids,
+                ],
+            ]);
+        }
+        return $this->response->setJsonContent($games->toArray());
     }
 
     public function getGamesAction()

@@ -56,7 +56,7 @@ $(() => {
             initialTags: [],
             delimiter: ', ',
             placeholder: '输入或选择标签，输入多个标签以空格分割',
-            beforeTagSave: function(field, editor, tags, tag, val) {
+            beforeTagSave: (field, editor, tags, tag, val) => {
                 // Remove tag + tag; add tag + val
                 if (tag) {
                     // 表示修改，先删除tsgs
@@ -69,7 +69,7 @@ $(() => {
                     football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
                 }
             },
-            beforeTagDelete: function(field, editor, tags, val) {
+            beforeTagDelete: (field, editor, tags, val) => {
                 // Remove tag + val;
                 // 删除
                 nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
@@ -92,7 +92,7 @@ $(() => {
                 initialTags: tags,
                 delimiter: ', ',
                 placeholder: '输入或选择标签，输入多个标签以空格分割',
-                beforeTagSave: function(field, editor, tags, tag, val) {
+                beforeTagSave: (field, editor, tags, tag, val) => {
                     // Remove tag + tag; add tag + val
                     if (tag) {
                         // 表示修改，先删除tsgs
@@ -105,7 +105,7 @@ $(() => {
                         football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
                     }
                 },
-                beforeTagDelete: function(field, editor, tags, val) {
+                beforeTagDelete: (field, editor, tags, val) => {
                     // Remove tag + val;
                     // 删除
                     nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
@@ -176,8 +176,7 @@ $(() => {
         container.attr('game-id', game_id);
     };
 
-    // 建立树形菜单
-    const tree = new Tree((view) => {
+    let createTreeView = (view) =>{
         let tree = $('#tree');
         tree.treeview({
             data: view,
@@ -209,17 +208,24 @@ $(() => {
                 refresh(conditions, game_id);
             }
         });
-        let game_id = container.attr('game-id');
-        wall.loadFromGame(container);
-        container.attr('game-id', game_id);
+    };
+
+    // 建立树形菜单
+    const tree = new Tree((view) => {
+        createTreeView(view);
     });
     // 获取菜单并显示
-    tree.show();
+    tree.show(() => {
+        let game_id = container.attr('game-id');
+        let conditions = {};
+        conditions.game_id = game_id;
+        refresh(conditions, game_id)
+    });
 
-    const xhrOnProgress = function(fun) {
+    const xhrOnProgress = (fun) => {
         xhrOnProgress.onprogress = fun; //绑定监听
         //使用闭包实现监听绑
-        return function() {
+        return () => {
             //通过$.ajaxSettings.xhr();获得XMLHttpRequest对象
             const xhr = $.ajaxSettings.xhr();
             //判断监听函数是否为函数
@@ -264,14 +270,14 @@ $(() => {
                     processData: false,
                     contentType: false,
                     dataType: 'json',
-                    xhr: xhrOnProgress(function(e){
+                    xhr: xhrOnProgress((e) => {
                         // 获取进度
                         let percent = e.loaded / e.total;//计算百分比
                         tr.css('background', '#f0f0f0 linear-gradient(to right, #e4f1fb ' + percent * 100 + '%, rgba(0, 0, 0, 0) ' + (percent * 100 + (10 - percent * 10)) + '%)');
                         td_percent.html((percent * 100).toFixed(0) + '%');
                         td_file.find('p').text((e.loaded / 1024 / 1024).toFixed(2) + 'MB / ' + (e.total / 1024 / 1024).toFixed(2) + 'MB');
                     })
-                }).done(function(res) {
+                }).done((res) => {
                     if (res.status === 'success') {
                         let image = res.data[file.name];
                         let section = wall.dataToHtml({
@@ -393,20 +399,30 @@ $(() => {
         }
         obj.find('input[type="checkbox"]').on('change', (event) => {
             let tag = $(event.currentTarget).siblings('span').text();
+            let labels = JSON.parse(obj.attr('data-labels') || '[]');
             if ($(event.currentTarget).is(":checked")) {
                 // 选中
-                //$('#tags-editor').tagEditor('addTag', tag);
+                obj.attr('data-labels', JSON.stringify(labels.concat([tag])));
             } else {
                 // 未选中
+                let index = labels.indexOf(tag);
+                if (index > -1) {
+                    labels.splice(index, 1);
+                }
+                obj.attr('data-labels', JSON.stringify(labels));
                 //$('#tags-editor').tagEditor('removeTag', tag);
             }
+            tree.show(() => {
+                let game_id = container.attr('game-id');
+                let conditions = {};
+                conditions.game_id = game_id;
+                refresh(conditions, game_id)
+            }, labels);
         });
     };
 
     let labels = $('#labels');
-    $.get(labels.attr('data-api'), {
-
-    }, (data) => {
+    $.get(labels.attr('data-api'), (data) => {
         labels.show();
         createLabels(labels, data);
     }, 'json');
@@ -463,10 +479,7 @@ function Tree(func) {
     const container = $('#images-wall');
     this.func = func;
     this.api = $('#tree').attr('data-api');
-    this.tag = '';
-    this.start_time = '';
-    this.end_time = '';
-    this.keywords = '';
+    this.labels = [];
     this.tree = {};
     this.view = {};
 
@@ -488,25 +501,21 @@ function Tree(func) {
         return fmt;
     };
 
-    this.show = (tag, start_time, end_time, keywords) => {
-        tag && (this.tag = tag);
-        start_time && (this.start_time = start_time);
-        end_time && (this.end_time = end_time);
-        keywords && (this.end_time = keywords);
+    this.show = (func, labels) => {
+        labels && (this.labels = labels);
         // 拿到数据
         this.getData(() => {
             // 绘制菜单
             this.paint();
         });
+        func();
     };
     // 通过Ajax获取数据，并调用dateToTree转换为树状结构
     this.getData = (func) => {
         $.get(this.api, {
-            tag: this.tag,
-            start_time: this.start_time,
-            end_time: this.end_time,
-            keywords: this.keywords
+            labels: this.labels
         }, (data) => {
+            this.tree = [];
             for (let key in data) {
                 this.dateToTree(data[key]);
             }
@@ -621,7 +630,7 @@ function ImageWall(container, func) {
         section.attr('game-id', data.game_id);
         section.attr('image-id', data.id);
         section.attr('image-name', data.name);
-        section.attr('image-tags', JSON.stringify(data.tags.map(function (tag) {
+        section.attr('image-tags', JSON.stringify(data.tags.map((tag) => {
             return tag.name;
         })));
         const title = $('<div>').addClass('title').html($('<h3>').text(data.name));
