@@ -36,7 +36,7 @@ class ImsTags extends Model
             'id',
             'ImsGamesTags',
             'tag_id', 'game_id',
-            'ImsTags',
+            'ImsGames',
             'id',
             [
                 'alias' => 'Games',

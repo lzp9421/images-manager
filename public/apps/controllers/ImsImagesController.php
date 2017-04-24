@@ -16,9 +16,6 @@ class ImsImagesController extends ImsBaseController
         $month = $this->request->get('month', 'int');
         $date = $this->request->get('date', 'int');
 
-        $name = $this->request->get('name');
-        $start_time = $this->request->get('name');
-
         if ($game_id) {
             // 赛事ID
             $conditions[] = 'id = :game_id:';
@@ -45,25 +42,25 @@ class ImsImagesController extends ImsBaseController
         }
 
         if (empty($conditions) || empty($bind)) {
-            $games = Games::find()->toArray();
+            $images = Images::find();
         } else {
             $games = Games::find([
                 'conditions' => implode(' AND ', $conditions),
                 'bind'       => $bind,
                 'columns'    => 'id',
             ])->toArray();
-        }
-        $game_ids = array_map(function ($game) {
-            return $game['id'];
-        }, $games);
+            $game_ids = (array)array_map(function ($game) {
+                return $game['id'];
+            }, $games);
 
-        $images = Images::find([
-            'conditions' => 'game_id IN({game_ids:array})',
-            'bind' => [
-                'game_ids' => $game_ids,
-            ],
-            'order' => 'updated_at DESC',
-        ]);
+            $images = Images::find([
+                'conditions' => 'game_id IN({game_ids:array})',
+                'bind' => [
+                    'game_ids' => $game_ids,
+                ],
+                'order' => 'updated_at DESC',
+            ]);
+        }
         $result = [];
         foreach ($images as $image) {
             $result[] = [
@@ -80,12 +77,80 @@ class ImsImagesController extends ImsBaseController
         return $this->response;
     }
 
-    public function search()
+    public function searchAction()
     {
-        $name = $this->request('name');
+        $name = $this->request->get('name');
         $start_time = $this->request->get('start_time');
         $end_time = $this->request->get('end_time');
-        $tags = (array)$this->request->get('tags');
+        $tags_name = (array)$this->request->get('tags');
+
+        if ($start_time) {
+            $conditions[] = 'date > :start_time:';
+            $bind['start_time'] = $start_time;
+        }
+        if ($end_time) {
+            $conditions[] = 'date < :end_time:';
+            $bind['end_time'] = $end_time;
+        }
+        if (!empty($conditions) && !empty($bind)) {
+            $games = Games::find([
+                'conditions' => implode(' AND ', $conditions),
+                'bind' => $bind,
+                'columns' => 'id',
+            ])->toArray();
+            $game_ids = array_map(function ($game) {
+                return $game['id'];
+            }, $games);
+            $images_conditions[] = 'game_id IN({game_ids:array})';
+            $images_bind['game_ids'] = $game_ids;
+        }
+
+        if ($tags_name) {
+            $tags = Tags::find([
+                'conditions' => 'name IN({tags_name:array})',
+                'bind' => [
+                    'tags_name' => $tags_name,
+                ]
+            ]);
+            $image_ids = [];
+            foreach ($tags as $tag) {
+                $image_ids = array_unique($image_ids + (array)array_map(function ($image) {
+                    return $image['id'];
+                }, $tag->images->toArray()));
+            }
+            if (!empty($image_ids)) {
+                $images_conditions[] = 'id IN({image_ids:array})';
+                $images_bind['image_ids'] = $image_ids;
+            }
+        }
+        if ($name) {
+            $images_conditions[] = 'name LIKE :name:';
+            $images_bind['name'] = '%'.$name.'%';
+        }
+        if (empty($images_conditions) || empty($images_bind)) {
+            $images = [];
+        } else {
+            $images = Images::find([
+                'conditions' => implode(' AND ', $images_conditions),
+                'bind' => $images_bind,
+                'order' => 'updated_at DESC',
+            ]);
+        }
+
+        $result = [];
+        foreach ($images as $image) {
+            $result[] = [
+                'id' => $image->id,
+                'name' => $image->name,
+                'thumb' => $image->thumb,
+                'url' => $image->url,
+                'type' => $image->game->type,
+                'game_id' => $image->game_id,
+                'tags' => $image->tags->toArray(),
+            ];
+        }
+        $this->response->setJsonContent($result);
+        return $this->response;
     }
 
     public function uploadAction()

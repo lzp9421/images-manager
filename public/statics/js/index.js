@@ -431,6 +431,30 @@ $(() => {
         $(event.currentTarget).parents('aside').addClass('sr-only');
         $('#aside-tree').removeClass('sr-only');
     });
+    $('#btn-search').on('click', (event) => {
+        let name = $('#search-image-mane');
+        let start_time = $('#search-start-time');
+        let end_time = $('#search-end-time');
+        let football_search = $('#football-search');
+        let nba_search = $('#nba-search');
+        let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
+        wall.clear();
+        container.masonry('destroy');
+        container.masonry(options);
+        wall.searchImage({
+            name: name.val(),
+            start_time: start_time.val(),
+            end_time: end_time.val(),
+            tags: tags
+        });
+        // container.attr('game-id', game_id);
+    });
+
+    let upload_modal = $('#upload-modal');
+    upload_modal.find('button.finish').on('click', (event) => {
+        let first_image = container.find('section.box').first();
+        first_image.find('.glyphicon-pencil').trigger('click');
+    });
 
 });
 
@@ -572,13 +596,13 @@ function ImageWall(container, func) {
         });
     };
     // 通过查询条件加载图片
-    this.loadFromCondition = (tag, start_time, end_time, keywords) => {
-        this.game_id = '';
-        this.tag = tag;
-        this.start_time = start_time;
-        this.end_time = end_time;
-        this.keywords = keywords;
-        this.getImage();
+    this.searchImage = (data) => {
+        $.get('ims_images/search', data, (data) => {
+            for (let key in data) {
+                this.container.append(this.dataToHtml(data[key]));
+            }
+            this.func();
+        }, 'json');
     };
     // ajax加载图片并插入到图片墙
     this.getImage = (data) => {
