@@ -597,7 +597,7 @@ function ImageWall(container, func) {
     };
     // 通过查询条件加载图片
     this.searchImage = (data) => {
-        $.get('ims_images/search', data, (data) => {
+        $.get(this.api + '/search', data, (data) => {
             for (let key in data) {
                 this.container.append(this.dataToHtml(data[key]));
             }

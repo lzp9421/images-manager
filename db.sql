@@ -27,9 +27,51 @@ CREATE TABLE `ims_games` (
   `date` date DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `type` char(10) NOT NULL,
+  `remote_game_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `nba_match_id_uindex` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='NBA比赛';
+  UNIQUE KEY `nba_match_id_uindex` (`id`),
+  UNIQUE KEY `ims_games_remote_game_id_uindex` (`remote_game_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8 COMMENT='比赛';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ims_games_labels`
+--
+
+DROP TABLE IF EXISTS `ims_games_labels`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_games_labels` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `game_id` int(10) unsigned DEFAULT NULL,
+  `label_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ims_games_labels_id_uindex` (`id`),
+  KEY `ims_games_labels_ims_games_id_fk` (`game_id`),
+  KEY `ims_games_labels_ims_labels_id_fk` (`label_id`),
+  CONSTRAINT `ims_games_labels_ims_games_id_fk` FOREIGN KEY (`game_id`) REFERENCES `ims_games` (`id`),
+  CONSTRAINT `ims_games_labels_ims_labels_id_fk` FOREIGN KEY (`label_id`) REFERENCES `ims_labels` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='games与labels关联的中间表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ims_games_tags`
+--
+
+DROP TABLE IF EXISTS `ims_games_tags`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_games_tags` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `game_id` int(10) unsigned DEFAULT NULL,
+  `tag_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ims_games_tags_id_uindex` (`id`),
+  KEY `ims_games_tags_ims_games_id_fk` (`game_id`),
+  KEY `ims_games_tags_ims_tags_id_fk` (`tag_id`),
+  CONSTRAINT `ims_games_tags_ims_games_id_fk` FOREIGN KEY (`game_id`) REFERENCES `ims_games` (`id`),
+  CONSTRAINT `ims_games_tags_ims_tags_id_fk` FOREIGN KEY (`tag_id`) REFERENCES `ims_tags` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='game的默认标签';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -53,7 +95,7 @@ CREATE TABLE `ims_images` (
   KEY `images_created_at_index` (`created_at`),
   KEY `images_updated_at_index` (`updated_at`),
   CONSTRAINT `nba_images_nba_match_id_fk` FOREIGN KEY (`game_id`) REFERENCES `ims_games` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='NBA图片资源';
+) ENGINE=InnoDB AUTO_INCREMENT=744 DEFAULT CHARSET=utf8 COMMENT='NBA图片资源';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +115,22 @@ CREATE TABLE `ims_images_tags` (
   KEY `nba_images_tags_nba_tags_id_fk` (`tag_id`),
   CONSTRAINT `nba_images_tags_nba_images_id_fk` FOREIGN KEY (`image_id`) REFERENCES `ims_images` (`id`),
   CONSTRAINT `nba_images_tags_nba_tags_id_fk` FOREIGN KEY (`tag_id`) REFERENCES `ims_tags` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ims_labels`
+--
+
+DROP TABLE IF EXISTS `ims_labels`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_labels` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ims_labels_id_uindex` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='赛程标签';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,7 +146,7 @@ CREATE TABLE `ims_tags` (
   `type` char(10) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nba_tags_id_uindex` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='NBA标签';
+) ENGINE=InnoDB AUTO_INCREMENT=1085 DEFAULT CHARSET=utf8 COMMENT='NBA标签';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -101,4 +158,4 @@ CREATE TABLE `ims_tags` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-20 16:13:22
+-- Dump completed on 2017-04-24  9:35:55
