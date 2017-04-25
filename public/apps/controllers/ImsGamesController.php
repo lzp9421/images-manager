@@ -72,7 +72,10 @@ class ImsGamesController extends ImsBaseController
         $labels         = (array)$this->request->getPost('labels', 'string');
         $tags           = (array)$this->request->getPost('tags', 'string');
 
-        $game = new Games;
+        $game = Games::findFirstByRemoteGameId($remote_game_id);
+        if (!$game) {
+            $game = new Games;
+        }
         $game->remote_game_id = $remote_game_id;
         $game->name   = $name;
         $game->date   = (new \DateTime($date, new \DateTimeZone('PRC')))->format('Y-m-d');

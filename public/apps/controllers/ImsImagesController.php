@@ -64,13 +64,13 @@ class ImsImagesController extends ImsBaseController
         $result = [];
         foreach ($images as $image) {
             $result[] = [
-                'id' => $image->id,
-                'name' => $image->name,
-                'thumb' => $image->thumb,
-                'url' => $image->url,
-                'type' => $image->game->type,
+                'id'      => $image->id,
+                'name'    => $image->name,
+                'thumb'   => $image->thumb,
+                'url'     => $image->url,
+                'type'    => $image->game->type,
                 'game_id' => $image->game_id,
-                'tags' => $image->tags->toArray(),
+                'tags'    => $image->tags->toArray(),
             ];
         }
         $this->response->setJsonContent($result);

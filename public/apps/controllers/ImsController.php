@@ -32,8 +32,8 @@ class ImsController extends ImsBaseController
             ->addJs('viewer/viewer.min.js')
             ->addJs('masonry/masonry.pkgd.min.js')
             ->addJs('imagesLoaded/imagesloaded.pkgd.min.js')
-            ->addJs('tagEditor/js/jquery.tag-editor.js')
             ->addJs('tagEditor/js/jquery.caret.min.js')
+            ->addJs('tagEditor/js/jquery.tag-editor.js')
             ->addJs('datetimepicker/js/bootstrap-datetimepicker.min.js')
             ->addJs('sweetalert/sweetalert.min.js')
             ->addJs("js/index.js");

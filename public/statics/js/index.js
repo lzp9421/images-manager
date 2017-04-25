@@ -49,6 +49,18 @@ $(() => {
             });
         });
     };
+
+    const setTag = (o, t, b) => {
+        console.log(t);
+        let tags = o.find('span:contains(' + t + ')');
+        tags.each((i, e) => {
+            console.log(t)
+            console.log(e);
+            if ($(e).text() === t) {
+                $(e).siblings('input[type="checkbox"]').prop("checked", b);
+            }
+        });
+    };
     const regTagschenge = (obj) => {
         const football_tags = $('#football-tags-search');
         const nba_tags = $('#nba-tags-search');
@@ -60,20 +72,20 @@ $(() => {
                 // Remove tag + tag; add tag + val
                 if (tag) {
                     // 表示修改，先删除tsgs
-                    nba_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", false);
-                    football_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                    setTag(nba_tags, tag, false);
+                    setTag(football_tags, tag, false);
                 }
                 if (val) {
                     // 添加
-                    nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
-                    football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
+                    setTag(nba_tags, val, true);
+                    setTag(football_tags, val, true);
                 }
             },
             beforeTagDelete: (field, editor, tags, val) => {
                 // Remove tag + val;
                 // 删除
-                nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
-                football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                setTag(nba_tags, val, false);
+                setTag(football_tags, val, false);
             }
         });
     };
@@ -96,20 +108,20 @@ $(() => {
                     // Remove tag + tag; add tag + val
                     if (tag) {
                         // 表示修改，先删除tsgs
-                        nba_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", false);
-                        football_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                        setTag(nba_tags, tag, false);
+                        setTag(football_tags, tag, false);
                     }
                     if (val) {
                         // 添加
-                        nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
-                        football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", true);
+                        setTag(nba_tags, val, true);
+                        setTag(football_tags, val, true);
                     }
                 },
                 beforeTagDelete: (field, editor, tags, val) => {
                     // Remove tag + val;
                     // 删除
-                    nba_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
-                    football_tags.find('span:contains(' + val + ')').siblings('input[type="checkbox"]').prop("checked", false);
+                    setTag(nba_tags, val, false);
+                    setTag(football_tags, val, false);
                 }
             });
             // 加入赛事id
