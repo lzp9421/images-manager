@@ -216,6 +216,7 @@ class ImsImagesController extends ImsBaseController
         $remote_game_id = $this->request->get('game_id');
         $name           = $this->request->get('name') ?: '未命名 ';
         $url            = $this->request->get('url');
+        $thumb          = $this->request->get('thumb') ?: $url;
 
         $game = Games::findFirst([
             'conditions' => 'remote_game_id = ?1',
@@ -226,7 +227,6 @@ class ImsImagesController extends ImsBaseController
         if (!$game) {
             return $this->response->setJsonContent(['status' => 'error', 'data' => '比赛不存在，请先建立该场比赛']);
         }
-        $thumb = $url;
         $this->store($name, $game->id, $url, $thumb);
         return $this->response->setJsonContent(['status' => 'success']);
     }

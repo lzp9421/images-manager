@@ -138,7 +138,7 @@ $(() => {
                     // 根据文本框中的标签自动选择tags-label中的标签
                     nba_tags.find('input[type="checkbox"]').prop("checked", false);
                     tags.forEach((tag) => {
-                        nba_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", true);
+                        setTag(nba_tags, tag, true);
                     });
                     break;
                 case '足球':
@@ -147,7 +147,7 @@ $(() => {
                     // 根据文本框中的标签自动将tags-label中的标签设置为选中状态
                     football_tags.find('input[type="checkbox"]').prop("checked", false);
                     tags.forEach((tag) => {
-                        football_tags.find('span:contains(' + tag + ')').siblings('input[type="checkbox"]').prop("checked", true);
+                        setTag(football_tags, tag, true);
                     });
                     break;
                 default:
@@ -414,7 +414,8 @@ $(() => {
             let labels = JSON.parse(obj.attr('data-labels') || '[]');
             if ($(event.currentTarget).is(":checked")) {
                 // 选中
-                obj.attr('data-labels', JSON.stringify(labels.concat([tag])));
+                labels = labels.concat([tag]);
+                obj.attr('data-labels', JSON.stringify(labels));
             } else {
                 // 未选中
                 let index = labels.indexOf(tag);

@@ -11,7 +11,7 @@ class ImsGamesController extends ImsBaseController
     {
         $labels_name = (array)$this->request->get('labels', 'string');
         // 按照Type分组返回所有日期
-        if (empty($labels_name)) {
+        if (empty($labels_name) || in_array('全部', $labels_name)) {
             $games = Games::find();
         } else {
             $labels = Labels::find([
@@ -25,6 +25,9 @@ class ImsGamesController extends ImsBaseController
                 $ids = array_unique($ids + array_map(function ($game) {
                         return $game['id'];
                     }, $label->games->toArray()));
+            }
+            if (empty($ids)) {
+                return $this->response->setJsonContent([]);
             }
             $games = Games::find([
                 'conditions' => 'id IN({ids:array})',
