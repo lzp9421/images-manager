@@ -3,6 +3,27 @@
  */
 
 $(() => {
+
+
+    Date.prototype.Format = function(fmt) { //author: meizz
+        const o = {
+            "M+" : this.getMonth() + 1,               //月份
+            "d+" : this.getDate(),                    //日
+            "h+" : this.getHours(),                   //小时
+            "m+" : this.getMinutes(),                 //分
+            "s+" : this.getSeconds(),                 //秒
+            "q+" : Math.floor((this.getMonth()+3)/3), //季度
+            "S"  : this.getMilliseconds()             //毫秒
+        };
+        if(/(y+)/.test(fmt))
+            fmt=fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for(let k in o)
+            if(new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
+        return fmt;
+    };
+
+
     const container = $('#images-wall');
     // 图片墙
     const imstags = $('#tags');
@@ -51,11 +72,8 @@ $(() => {
     };
 
     const setTag = (o, t, b) => {
-        console.log(t);
         let tags = o.find('span:contains(' + t + ')');
         tags.each((i, e) => {
-            console.log(t)
-            console.log(e);
             if ($(e).text() === t) {
                 $(e).siblings('input[type="checkbox"]').prop("checked", b);
             }
@@ -166,7 +184,7 @@ $(() => {
                 $(image.img).addClass('broken');
             }
             $(image.img).parent('section').css('visibility', 'visible');
-            container.masonry('appended', $(image.img).parent('section')).masonry('layout');;
+            container.masonry('appended', $(image.img).parent('section')).masonry('layout');
         });
         imgLoad.on('always', () => {
             container.viewer({
@@ -441,16 +459,23 @@ $(() => {
         createLabels(labels, data);
     }, 'json');
 
-    $('#search-start-time').datetimepicker({
-        format: 'yyyy-mm-dd',
-        minView: 'month',
-        autoclose: true
+    $('#search-time-range').on('change', (event) => {
+        let date = new Date;
+        let start_time = $('#search-start-time');
+        switch ($(event.currentTarget).val()) {
+            case '1':
+            case '3':
+            case '12':
+                date.setMonth(date.getMonth() - $(event.currentTarget).val());
+                start_time.val(date.Format('yyyy-MM-dd'));
+                break;
+            default:
+                start_time.val('');
+                break;
+        }
     });
-    $('#search-end-time').datetimepicker({
-        format: 'yyyy-mm-dd',
-        minView: 'month',
-        autoclose: true
-    });
+
+
     // 高级搜索
     $('#conditions-search').on('click', (event) => {
         $(event.currentTarget).parents('aside').addClass('sr-only');
@@ -489,6 +514,8 @@ $(() => {
 
 });
 
+
+
 // 树形菜单
 function Tree(func) {
     const container = $('#images-wall');
@@ -497,24 +524,6 @@ function Tree(func) {
     this.labels = [];
     this.tree = {};
     this.view = {};
-
-    Date.prototype.Format = function(fmt) { //author: meizz
-        const o = {
-            "M+" : this.getMonth() + 1,               //月份
-            "d+" : this.getDate(),                    //日
-            "h+" : this.getHours(),                   //小时
-            "m+" : this.getMinutes(),                 //分
-            "s+" : this.getSeconds(),                 //秒
-            "q+" : Math.floor((this.getMonth()+3)/3), //季度
-            "S"  : this.getMilliseconds()             //毫秒
-        };
-        if(/(y+)/.test(fmt))
-            fmt=fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-        for(let k in o)
-            if(new RegExp("(" + k + ")").test(fmt))
-                fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
-        return fmt;
-    };
 
     this.show = (func, labels) => {
         labels && (this.labels = labels);

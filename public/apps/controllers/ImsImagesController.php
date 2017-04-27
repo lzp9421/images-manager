@@ -95,18 +95,19 @@ class ImsImagesController extends ImsBaseController
         $start_time = $this->request->get('start_time');
         $end_time = $this->request->get('end_time');
         $tags_name = (array)$this->request->get('tags');
-
+        $tags_name[] = $name;
+        $game_name = $name;
         if ($start_time) {
             $conditions[] = 'date > :start_time:';
             $bind['start_time'] = $start_time;
         }
-        if ($end_time) {
-            $conditions[] = 'date < :end_time:';
-            $bind['end_time'] = $end_time;
-        }
+        /*if ($game_name) {
+            $conditions[] = 'name LIKE :game_name:';
+            $bind['game_name'] = '%'.$game_name.'%';
+        }*/
         if (!empty($conditions) && !empty($bind)) {
             $games = Games::find([
-                'conditions' => implode(' AND ', $conditions),
+                'conditions' => implode(' OR ', $conditions),
                 'bind' => $bind,
                 'columns' => 'id',
             ])->toArray();
@@ -140,7 +141,9 @@ class ImsImagesController extends ImsBaseController
             $images_bind['name'] = '%'.$name.'%';
         }
         if (empty($images_conditions) || empty($images_bind)) {
-            $images = [];
+            $images = Images::find([
+                'order' => 'updated_at DESC',
+            ]);
         } else {
             $images = Images::find([
                 'conditions' => implode(' AND ', $images_conditions),

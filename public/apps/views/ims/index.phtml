@@ -10,32 +10,40 @@
 <body class="container">
 <div class="row">
     <aside class="col-md-4 visible-md-block visible-lg-block pull-left" id="aside-tree">
-        <div>
-            <button class="btn btn-default" id="conditions-search">高级搜索</button>
-        </div>
+        <h2>
+            <button class="btn btn-default" id="conditions-search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> 高级搜索</button>
+        </h2>
+        <br>
         <section id="labels" class="tags-label" data-api="<?= $url->get('ims_labels') ?>"></section>
         <nav>
             <div id="tree" data-api="<?= $url->get('ims_games') ?>"></div>
         </nav>
     </aside>
     <aside class="col-md-4 visible-md-block visible-lg-block pull-left sr-only" id="aside-search">
-        <div>
-            <button type="button" id="treeview-search" class="btn btn-default">返回目录树</button>
-        </div>
-        <form id="search" class="form-inline">
+        <h2>
+            <button type="button" id="treeview-search" class="btn btn-default"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> 返回赛程列表</button>
+        </h2>
+        <br>
+        <form id="search">
             <div class="form-group">
-                <label for="search-image-mane" class="from-control-static">图片名称：</label>
-                <input type="text" id="search-image-mane" class="form-control" placeholder="不限">
+                <label for="search-image-mane" class="from-control-static">关键词搜索：</label>
+                <input type="text" id="search-image-mane" class="form-control" placeholder="请输入关键词">
+            </div>
+            <br>
+            <input type="text" id="search-start-time" class="sr-only">
+            <input type="text" id="search-end-time" class="sr-only">
+            <div class="form-group">
+                <label for="search-time-range" class="from-control-static">时间范围：</label>
+                <select id="search-time-range" class="form-control">
+                    <option value="0" selected>全部</option>
+                    <option value="1">一个月</option>
+                    <option value="3">三个月</option>
+                    <option value="12">一年</option>
+                </select>
             </div>
             <br>
             <div class="form-group">
-                <label for="search-start-time" class="from-control-static">开始时间：</label>
-                <input type="text" id="search-start-time" class="form-control" placeholder="不限">
-            </div>
-            <br>
-            <div class="form-group">
-                <label for="search-end-time" class="from-control-static">结束时间：</label>
-                <input type="text" id="search-end-time" class="form-control" placeholder="不限">
+                <button type="button" id="btn-search" class="btn btn-primary">搜索</button>
             </div>
             <br>
             <div class="form-group">
@@ -49,10 +57,6 @@
                 <input type="text" id="nba-search" class="form-control" placeholder="不限">
                 <div class="panel-body tags-label" id="nba-tags-search" style="display:block;"></div>
             </div>
-            <br>
-            <div class="form-group">
-                <button type="button" id="btn-search" class="btn btn-primary">搜索</button>
-            </div>
         </form>
     </aside>
     <div class="col-md-8 col-sm-12 col-xs-12 pull-right">
@@ -61,9 +65,6 @@
                 <span class="col-md-2 col-sm-2 col-xs-3">
                     <input type="file" id="images-upload" multiple accept="image/jpeg,image/png,image/gif,image/bmp" style="display: none">
                     <button class="btn btn-block btn-primary">上传</button>
-                </span>
-                <span class="col-md-2 col-md-offset-8 col-sm-2 col-sm-offset-8 col-xs-3 col-xs-offset-6">
-                    <button class="btn btn-block btn-danger">删除</button>
                 </span>
             </h2>
             <hr>
