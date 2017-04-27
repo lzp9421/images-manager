@@ -9,7 +9,7 @@ $(() => {
 
     const options = {
         itemSelector : '.box',
-        columnWidth: 1,
+        //columnWidth: 1,
         isAnimated: true
     };
 
@@ -166,7 +166,7 @@ $(() => {
                 $(image.img).addClass('broken');
             }
             $(image.img).parent('section').css('visibility', 'visible');
-            container.masonry('appended', $(image.img).parent('section'));
+            container.masonry('appended', $(image.img).parent('section')).masonry('layout');;
         });
         imgLoad.on('always', () => {
             container.viewer({
@@ -181,11 +181,12 @@ $(() => {
 
     // 刷新图片墙
     let refresh = (conditions, game_id) => {
-        wall.clear();
         container.masonry('destroy');
+        wall.clear();
         container.masonry(options);
         wall.loadFromGame(conditions);
         container.attr('game-id', game_id);
+        container.trigger('click');
     };
 
     let createTreeView = (view) =>{
@@ -307,7 +308,7 @@ $(() => {
                             let img = section.find('img');
                             img.removeClass('loading');
                             img.parent('section').css('visibility', 'visible');
-                            container.masonry('prepended', section);
+                            container.masonry('prepended', section).masonry('layout');;
                         });
                         regRemove(section.find('.remove'));
                         regEdit(section.find('.edit'));

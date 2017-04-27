@@ -28,3 +28,11 @@ if (!function_exists('api_verify')) {
         return true;
     }
 }
+
+if (!function_exists('get_current_url')) {
+    function get_current_url () {
+        $http = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ? 'https://' : 'http://';
+        $port = $_SERVER["SERVER_PORT"]==80 ? '' : ':' . $_SERVER["SERVER_PORT"];
+        return $http . $_SERVER['SERVER_NAME'] . $port . '/';
+    }
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图片选择器插件</title>
+</head>
+<body>
+<h1>图片选择器插件示例</h1>
+图片链接<input type="text" id="url">
+<button id="btn" type="button">选择</button>
+
+<script type="text/javascript" src="//apps.bdimg.com/libs/jquery/1.4.4/jquery.min.js"></script>
+<style>
+    .bt{ width: 100px; height: 30px; border: 1px solid #007CE1; background-color: #008CFF; color: #FFFFFF; font-weight: 700; }
+    #mry-mask { width: 100%; height: 100%; position: fixed; top: 0px; left: 0px; background-color: rgb(45, 45, 45); z-index: 100; opacity: 0.2; display: none; background-position: initial initial; background-repeat: initial initial; }
+    #mry-opo { position: fixed; z-index: 7000; left: 50%; top: 50%; -webkit-box-shadow: 1px 1px 2px 2px #C1C1C1; box-shadow: 1px 1px 2px 2px #C1C1C1; }
+    #mry-opo-title { height: 30px; font-size: 14px; padding-left: 10px; line-height: 30px; background-color: #008CFF; color: #FFFFFF; font-weight: bold; }
+    #mry-opo-content { padding: 10px; height:600px;}
+
+</style>
+<script>
+    function pop(obj) {
+        function tanchuang(obj) {
+            $('body').append('<div id="mry-opo"><div id="mry-opo-title"></div><div  id="mry-opo-content"></div></div>');
+            var div = $('#mry-opo');
+            $('#mry-opo-title').text(obj.title);
+            $('#mry-opo-content').text(obj.content);
+            div.css('width', obj.width + 'px');
+            div.css('height', obj.height + 'px');
+            div.css('margin-left', -(parseInt(obj.width) / 2 - 100) + 'px');
+            div.css('margin-top', -(parseInt(obj.height) / 2) + 'px');
+            div.css('background', obj.backgorund);
+            $('#mry-mask').css('display', 'block');
+        }
+        function del() {
+            $('#mry-opo').append('<a href="javascript:void(0)" id="close-editor" deletes="mry-opo" style="position:absolute;right:10px;top:6px;color:#fff;font-size:12px;">X</a>');
+            $('[deletes=mry-opo]').click(function() {
+                $('#mry-opo,#mry-mask').remove();
+                $('#btn').removeAttr('disabled');
+            });
+        }
+        $('body').append('<div id="mry-mask" deletes="mry-opo"></div>');
+        var ject = obj;
+        ject.width = parseInt(obj.width) || 300;
+        ject.height = parseInt(obj.height) || 300;
+        ject.title = obj.title || '来自提示信息';
+        ject.content = obj.content || '这是一个提示信息';
+        ject.backgorund = obj.backgorund || '#fff';
+        tanchuang(ject);
+        del();
+    }
+</script>
+<script>
+    $(function () {
+        $('#btn').live('click', (event) => {
+            // TODO 开启选择框
+            pop({
+                width:1080,//提示窗口的宽度
+                height:600,//提示窗口的高度
+                title:'这是标题!',//提示窗口的标题
+            });
+            // ImagesManager(id, url, callback)
+            ImagesManager('mry-opo-content', '/ims', function (url) {
+                // TODO: 将url写入编辑器文本框
+                $('input#url').val(url);
+                // TUDO: 关闭选择框modal
+                $('#close-editor').trigger('click');
+            });
+            $('#btn').attr('disabled',"true");
+        });
+    });
+    // 以下代码无需修改
+    function ImagesManager(id, src, func) {
+        const iframe = $('<iframe>').attr('src', src).css('width', '100%').css('height', '100%').css('border', 'none');
+        $('#' + id).html(iframe);
+        iframe.bind('load', (event) => {
+            // 图片墙已经加载
+            setTimeout(() => {
+                // iframe加载完成
+                const frame = $(event.currentTarget).contents();
+                const images_wall = frame.find('#images-wall');
+                images_wall.bind('click', () => {
+                    const option = images_wall.find('.option').find('ul');
+                    option.append($('<li>').text('选择').addClass('choose').css('float', 'left'));
+                    option.find('.choose').bind('click', (event) => {
+                        const box = $(event.currentTarget).parents('section.box');
+                        const image = box.find('img');
+                        let url = image.attr('data-original');
+                        func(url);
+                    });
+                });
+                const option = images_wall.find('.option').find('ul');
+                option.append($('<li>').text('选择').addClass('choose').css('float', 'left'));
+                option.find('.choose').bind('click', (event) => {
+                    const box = $(event.currentTarget).parents('section.box');
+                    const image = box.find('img');
+                    let url = image.attr('data-original');
+                    func(url);
+                });
+            }, 500);
+        });
+    }
+</script>
+</body>
+</html>

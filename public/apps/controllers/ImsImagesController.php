@@ -4,12 +4,23 @@ use ImsGames as Games;
 use ImsImages as Images;
 use ImsTags as Tags;
 use Phalcon\Image\Adapter\Gd as Image;
+use Phalcon\Mvc\Url;
 
 class ImsImagesController extends ImsBaseController
 {
 
+    protected $url;
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this->url = new Url;
+        $this->url->setBaseUri(get_current_url());
+    }
+
     public function indexAction()
     {
+
         $type = $this->request->get('type', 'string');
         $game_id = $this->request->get('game_id', 'int');
         $year = $this->request->get('year', 'int');
@@ -61,13 +72,14 @@ class ImsImagesController extends ImsBaseController
                 'order' => 'updated_at DESC',
             ]);
         }
+
         $result = [];
         foreach ($images as $image) {
             $result[] = [
                 'id'      => $image->id,
                 'name'    => $image->name,
-                'thumb'   => $image->thumb,
-                'url'     => $image->url,
+                'thumb'   => $this->url->get($image->thumb),
+                'url'     => $this->url->get($image->url),
                 'type'    => $image->game->type,
                 'game_id' => $image->game_id,
                 'tags'    => $image->tags->toArray(),
@@ -142,8 +154,8 @@ class ImsImagesController extends ImsBaseController
             $result[] = [
                 'id' => $image->id,
                 'name' => $image->name,
-                'thumb' => $image->thumb,
-                'url' => $image->url,
+                'thumb'   => $this->url->get($image->thumb),
+                'url'     => $this->url->get($image->url),
                 'type' => $image->game->type,
                 'game_id' => $image->game_id,
                 'tags' => $image->tags->toArray(),
@@ -171,7 +183,9 @@ class ImsImagesController extends ImsBaseController
                 continue;
             }
             // Move the file into the application
-            $storage = $this->config->server->storage . (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d') . '/';
+            $datepath = 'day_' . (new \DateTime('now', new \DateTimeZone('PRC')))->format('ymd'). '/';
+            $storage = $this->config->server->storage . $datepath;
+            $cdn = $this->config->server->cdn . $datepath;
             $file_name = $file->getName();
             $file_uuid = uniqid();
             $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
@@ -189,7 +203,7 @@ class ImsImagesController extends ImsBaseController
             // 保存缩略图
             $image->save('./' . $thumb_name);
             try {
-                $image = $this->store($file_name, $game_id, $new_file_name, $thumb_name);
+                $image = $this->store($file_name, $game_id, $cdn . $file_uuid . '.' . $file_ext, $cdn . $file_uuid . '_thumb.' . $file_ext);
                 $result[$file_name] = $image->toArray();
                 $result[$file_name]['tags'] = $image->getTags()->toArray();
                 $result[$file_name]['game'] = $image->getGame()->toArray();
