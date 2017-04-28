@@ -30,7 +30,7 @@ $(() => {
 
     const options = {
         itemSelector : '.box',
-        //columnWidth: 1,
+        columnWidth: 1,
         isAnimated: true
     };
 
@@ -55,17 +55,26 @@ $(() => {
                         section.attr('image-id')
                     ]
                 }, (data) => {
-                    // remove clicked element
-                    container.masonry('remove', section).masonry('layout');
-                    // layout remaining item elements
+                    if (data.status === 'success') {
+                        // remove clicked element
+                        container.masonry('remove', section).masonry('layout');
+                        // layout remaining item elements
 
-                    //section.remove();
-                    swal({
-                        title: '删除成功',
-                        text: '图片' + section.attr('image-name') + '以成功从服务器删除',
-                        type: 'success',
-                        timer: 1000
+                        //section.remove();
+                        swal({
+                            title: '删除成功',
+                            text: '图片' + section.attr('image-name') + '已成功从服务器删除',
+                            type: 'success',
+                            timer: 1000
+                        });
+                    } else {
+                        swal({
+                        title: '删除失败' + data.data,
+                        text: '图片' + section.attr('image-name') + '未能成功删除',
+                        type: 'error',
+                        timer: 5000
                     });
+                    }
                 }, 'json');
             });
         });
@@ -173,27 +182,29 @@ $(() => {
         });
     };
 
-    const wall = new ImageWall(container, () => {
+    const wall = new ImageWall(container, (count) => {
         // 图片墙html加载之后执行
-        const imgLoad = imagesLoaded(container);
-        imgLoad.on('progress', (instance, image) => {
-            // 图片加载后，根据是否加载成功，标记图片样式
-            if (image.isLoaded) {
-                $(image.img).removeClass('loading');
-            } else {
-                $(image.img).addClass('broken');
-            }
-            $(image.img).parent('section').css('visibility', 'visible');
-            container.masonry('appended', $(image.img).parent('section')).masonry('layout');
-        });
-        imgLoad.on('always', () => {
-            container.viewer({
-                url: 'data-original'
+        if (count){
+            const imgLoad = imagesLoaded(container);
+            imgLoad.on('progress', (instance, image) => {
+                // 图片加载后，根据是否加载成功，标记图片样式
+                if (image.isLoaded) {
+                    $(image.img).removeClass('loading');
+                } else {
+                    $(image.img).addClass('broken');
+                }
+                $(image.img).parent('section').css('visibility', 'visible');
+                container.masonry('appended', $(image.img).parent('section')).masonry('layout');
             });
-            container.viewer('update');
-            regEdit($('.edit'));
-            regRemove($('.remove'));
-        });
+            imgLoad.on('always', () => {
+                container.viewer({
+                    url: 'data-original'
+                });
+                container.viewer('update');
+                regEdit($('.edit'));
+                regRemove($('.remove'));
+            });
+        }
         container.trigger('click');
     });
 
@@ -201,9 +212,9 @@ $(() => {
     let refresh = (conditions, game_id) => {
         container.masonry('destroy');
         wall.clear();
-        container.masonry(options);
         wall.loadFromGame(conditions);
         container.attr('game-id', game_id);
+        container.masonry(options);
         container.trigger('click');
     };
 
@@ -531,8 +542,8 @@ function Tree(func) {
         this.getData(() => {
             // 绘制菜单
             this.paint();
+            func();
         });
-        func();
     };
     // 通过Ajax获取数据，并调用dateToTree转换为树状结构
     this.getData = (func) => {
@@ -643,7 +654,7 @@ function ImageWall(container, func) {
             for (let key in data) {
                 this.container.append(this.dataToHtml(data[key]));
             }
-            this.func();
+            this.func(data.length);
         }, 'json');
     };
     // 获取到的json数据转换为html数据

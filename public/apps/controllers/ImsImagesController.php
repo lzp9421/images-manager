@@ -53,7 +53,7 @@ class ImsImagesController extends ImsBaseController
         }
 
         if (empty($conditions) || empty($bind)) {
-            $images = Images::find();
+            return $this->response->setJsonContent([]);
         } else {
             $games = Games::find([
                 'conditions' => implode(' AND ', $conditions),
@@ -67,7 +67,7 @@ class ImsImagesController extends ImsBaseController
             $images = Images::find([
                 'conditions' => 'game_id IN({game_ids:array})',
                 'bind' => [
-                    'game_ids' => $game_ids,
+                    'game_ids' => array_values($game_ids),
                 ],
                 'order' => 'updated_at DESC',
             ]);
@@ -85,8 +85,7 @@ class ImsImagesController extends ImsBaseController
                 'tags'    => $image->tags->toArray(),
             ];
         }
-        $this->response->setJsonContent($result);
-        return $this->response;
+        return $this->response->setJsonContent($result);
     }
 
     public function searchAction()
@@ -107,7 +106,7 @@ class ImsImagesController extends ImsBaseController
         }*/
         if (!empty($conditions) && !empty($bind)) {
             $games = Games::find([
-                'conditions' => implode(' OR ', $conditions),
+                'conditions' => implode(' AND ', $conditions),
                 'bind' => $bind,
                 'columns' => 'id',
             ])->toArray();
@@ -115,7 +114,7 @@ class ImsImagesController extends ImsBaseController
                 return $game['id'];
             }, $games);
             $images_conditions[] = 'game_id IN({game_ids:array})';
-            $images_bind['game_ids'] = $game_ids;
+            $images_bind['game_ids'] = array_values($game_ids);
         }
 
         if ($tags_name) {
@@ -127,13 +126,13 @@ class ImsImagesController extends ImsBaseController
             ]);
             $image_ids = [];
             foreach ($tags as $tag) {
-                $image_ids = array_unique($image_ids + (array)array_map(function ($image) {
+                $image_ids = array_unique(array_merge($image_ids, (array)array_map(function ($image) {
                     return $image['id'];
-                }, $tag->images->toArray()));
+                }, $tag->images->toArray())));
             }
             if (!empty($image_ids)) {
                 $images_conditions[] = 'id IN({image_ids:array})';
-                $images_bind['image_ids'] = $image_ids;
+                $images_bind['image_ids'] = array_values($image_ids);
             }
         }
         if ($name) {
@@ -141,9 +140,7 @@ class ImsImagesController extends ImsBaseController
             $images_bind['name'] = '%'.$name.'%';
         }
         if (empty($images_conditions) || empty($images_bind)) {
-            $images = Images::find([
-                'order' => 'updated_at DESC',
-            ]);
+            return $this->response->setJsonContent([]);
         } else {
             $images = Images::find([
                 'conditions' => implode(' AND ', $images_conditions),
@@ -164,8 +161,7 @@ class ImsImagesController extends ImsBaseController
                 'tags' => $image->tags->toArray(),
             ];
         }
-        $this->response->setJsonContent($result);
-        return $this->response;
+        return $this->response->setJsonContent($result);
     }
 
     public function uploadAction()
