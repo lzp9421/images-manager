@@ -210,6 +210,9 @@ class ImsImagesController extends ImsBaseController
                 return $this->response->setJsonContent(['status' => 'error', 'data' => $e->getMessage()]);
             }
         }
+        if (empty($result)) {
+            return $this->response->setJsonContent(['status' => 'error', 'data'=>'no image']);
+        }
         return $this->response->setJsonContent(['status' => 'success', 'data' => $result]);
     }
 

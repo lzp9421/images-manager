@@ -504,13 +504,12 @@ $(() => {
         let football_search = $('#football-search');
         let nba_search = $('#nba-search');
         let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
-        wall.clear();
         container.masonry('destroy');
+        wall.clear();
         container.masonry(options);
         wall.searchImage({
             name: name.val(),
             start_time: start_time.val(),
-            end_time: end_time.val(),
             tags: tags
         });
         // container.attr('game-id', game_id);
@@ -645,7 +644,7 @@ function ImageWall(container, func) {
             for (let key in data) {
                 this.container.append(this.dataToHtml(data[key]));
             }
-            this.func();
+            this.func(data.length);
         }, 'json');
     };
     // ajax加载图片并插入到图片墙
