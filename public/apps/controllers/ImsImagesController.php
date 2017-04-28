@@ -262,7 +262,13 @@ class ImsImagesController extends ImsBaseController
         if (!$game) {
             throw new \Exception('指定比赛不存在');
         }
-        $image = new Images;
+        $image = Images::findFirst([
+            'conditions' => 'game_id = ?1 AND url = ?2',
+            'bind' => [
+                1 => $game_id,
+                2 => $url,
+            ],
+        ]) ?: new Images;
         $image->name  = $name;
         $image->game  = $game;
         $image->url   = $url;
