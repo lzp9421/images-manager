@@ -5,6 +5,7 @@ use ImsImages as Images;
 use ImsTags as Tags;
 use Phalcon\Image\Adapter\Gd as Image;
 use Phalcon\Mvc\Url;
+use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
 class ImsImagesController extends ImsBaseController
 {
@@ -94,6 +95,7 @@ class ImsImagesController extends ImsBaseController
         $start_time = $this->request->get('start_time');
         $end_time = $this->request->get('end_time');
         $tags_name = (array)$this->request->get('tags');
+        $page = $this->request->get('page', 'int');
         $tags_name[] = $name;
         $game_name = $name;
         if ($start_time) {
@@ -113,8 +115,6 @@ class ImsImagesController extends ImsBaseController
             $game_ids = array_map(function ($game) {
                 return $game['id'];
             }, $games);
-            $images_conditions[] = 'game_id IN({game_ids:array})';
-            $images_bind['game_ids'] = array_values($game_ids);
         }
 
         if ($tags_name) {
@@ -143,14 +143,25 @@ class ImsImagesController extends ImsBaseController
             return $this->response->setJsonContent([]);
         } else {
             $images = Images::find([
-                'conditions' => implode(' AND ', $images_conditions),
-                'bind' => $images_bind,
+                'conditions' => implode(' AND ', $images_conditions) . (empty($game_ids) ? '' : 'AND game_id IN({game_ids:array})'),
+                'bind' => array_merge($images_bind, empty($game_ids) ? [] : ['game_ids' => array_values($game_ids)]),
                 'order' => 'updated_at DESC',
             ]);
         }
 
+        $paginator = new PaginatorModel(
+            [
+                "data"  => $images,
+                "limit" => 20,
+                "page"  => $page,
+            ]
+        );
+        $images = $paginator->getPaginate();
+        if ($images->last < $page) {
+            return $this->response->setJsonContent([]);
+        }
         $result = [];
-        foreach ($images as $image) {
+        foreach ($images->items as $image) {
             $result[] = [
                 'id' => $image->id,
                 'name' => $image->name,

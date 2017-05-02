@@ -34,7 +34,7 @@ class ImsGamesController extends ImsBaseController
             $games = Games::find([
                 'conditions' => 'id IN({ids:array})',
                 'bind' => [
-                    'ids' => $ids,
+                    'ids' => array_values($ids),
                 ],
                 'order' => 'date ASC',
             ]);

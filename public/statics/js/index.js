@@ -194,7 +194,7 @@ $(() => {
                     $(image.img).addClass('broken');
                 }
                 $(image.img).parent('section').css('visibility', 'visible');
-                container.masonry('appended', $(image.img).parent('section')).masonry('layout');
+                //container.masonry('appended', $(image.img).parent('section')).masonry('layout');
             });
             imgLoad.on('always', () => {
                 container.viewer({
@@ -232,8 +232,7 @@ $(() => {
                     let month = tree.treeview('getNode', data.parentId);
                     let year = tree.treeview('getNode', month.parentId);
                     conditions.type = tree.treeview('getNode', year.parentId).text;
-                    console.log(conditions);
-                } else if (/^[01]?\d月$/.test(data.text)) {
+                }/* else if (/^[01]?\d月$/.test(data.text)) {
                     conditions.month = parseInt(data.text);
                     let year = tree.treeview('getNode', data.parentId);
                     conditions.year = year.text;
@@ -246,7 +245,7 @@ $(() => {
                 } else if (/^[足篮]球$/) {
                     conditions.type = data.text;
                     console.log(conditions);
-                }
+                }*/
                 refresh(conditions, game_id);
             }
         });
@@ -470,20 +469,21 @@ $(() => {
         createLabels(labels, data);
     }, 'json');
 
-    $('#search-time-range').on('change', (event) => {
+    $('.shaixuan').on('click', (event) => {
         let date = new Date;
         let start_time = $('#search-start-time');
-        switch ($(event.currentTarget).val()) {
+        switch ($(event.currentTarget).attr('data-month')) {
             case '1':
             case '3':
             case '12':
-                date.setMonth(date.getMonth() - $(event.currentTarget).val());
+                date.setMonth(date.getMonth() - $(event.currentTarget).attr('data-month'));
                 start_time.val(date.Format('yyyy-MM-dd'));
                 break;
             default:
                 start_time.val('');
                 break;
         }
+        $('#btn-search').trigger('click');
     });
 
 
@@ -491,11 +491,13 @@ $(() => {
     $('#conditions-search').on('click', (event) => {
         $(event.currentTarget).parents('aside').addClass('sr-only');
         $('#aside-search').removeClass('sr-only');
+        $('.shaixuan').show();
     });
     // 目录树
     $('#treeview-search').on('click', (event) => {
         $(event.currentTarget).parents('aside').addClass('sr-only');
         $('#aside-tree').removeClass('sr-only');
+        $('.shaixuan').hide();
     });
     $('#btn-search').on('click', (event) => {
         let name = $('#search-image-mane');
@@ -510,8 +512,12 @@ $(() => {
         wall.searchImage({
             name: name.val(),
             start_time: start_time.val(),
-            tags: tags
+            tags: tags,
+            page: 1
+        }, (count) => {
+            container.attr('data-load', 'true');
         });
+        container.attr('data-page', 1);
         // container.attr('game-id', game_id);
     });
 
@@ -521,6 +527,43 @@ $(() => {
         let first_image = container.find('section.box').first();
         length === 1  && first_image.find('.glyphicon-pencil').trigger('click');
     });
+
+    scrollBottom = function (conditions, game_id) {
+        $(document).scroll(function (event) {
+            let name = $('#search-image-mane');
+            let start_time = $('#search-start-time');
+            let end_time = $('#search-end-time');
+            let football_search = $('#football-search');
+            let nba_search = $('#nba-search');
+            let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
+
+            let viewH = $(window).height(),//可见高度
+                contentH =$('body').get(0).scrollHeight,//内容高度
+                scrollTop =$('body').scrollTop();//滚动高度
+            if(container.attr('data-load') === 'true' && scrollTop/(contentH - viewH) >= 0.95){ //到达底部100px时,加载新内容
+                container.attr('data-load', 'false');
+                if (container.attr('data-method') === 'search') {
+                    container.attr('data-page', container.attr('data-page') * 1 + 1);
+                    container.masonry('destory');
+                    wall.searchImage({
+                        name: name.val(),
+                        start_time: start_time.val(),
+                        tags: tags,
+                        page: container.attr('data-page')
+                    }, (count) => {
+                        if (count) {
+                            container.attr('data-load', 'true');
+                        }
+                    });
+                }
+                //
+            }
+        });
+    };
+    scrollBottom();
+
+
+
 
 });
 
@@ -639,22 +682,26 @@ function ImageWall(container, func) {
         });
     };
     // 通过查询条件加载图片
-    this.searchImage = (data) => {
+    this.searchImage = (data, func) => {
+        this.container.attr('data-method', 'search');
         $.get(this.api + '/search', data, (data) => {
             for (let key in data) {
                 this.container.append(this.dataToHtml(data[key]));
             }
             this.func(data.length);
+            func(data.length);
         }, 'json');
     };
     // ajax加载图片并插入到图片墙
     this.getImage = (data) => {
+        this.container.attr('data-method', 'index');
         $.get(this.api, data, (data) => {
             for (let key in data) {
                 this.container.append(this.dataToHtml(data[key]));
             }
             this.func(data.length);
         }, 'json');
+        this.container.attr('data-load', 'false');
     };
     // 获取到的json数据转换为html数据
     this.dataToHtml = (data) => {
