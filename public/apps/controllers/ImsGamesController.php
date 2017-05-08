@@ -86,6 +86,8 @@ class ImsGamesController extends ImsBaseController
         $game->name   = $name;
         $game->date   = (new \DateTime($date, new \DateTimeZone('PRC')))->format('Y-m-d');
         $game->type   = $type === '足球' ? '足球' : '篮球' ;
+        $game->GamesLabels->delete();
+        $game->GamesTags->delete();
         $game->labels = array_map(function ($label) {
             return Labels::findFirst([
                 'conditions' => 'name = ?1',

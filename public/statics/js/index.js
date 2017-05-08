@@ -568,6 +568,9 @@ $(() => {
 });
 
 
+$('#images-wall').on('click', '.box .title', (event) => {
+    $(event.currentTarget).next('img').trigger('click');
+});
 
 // 树形菜单
 function Tree(func) {
@@ -621,38 +624,46 @@ function Tree(func) {
     this.date = d.Format('yyyy-MM-dd');
     let lock = 0;
     let currentlock = 1;
-    this.toView = (tree) => {
+    let type;
+    this.toView = (tree, depth) => {
         const view = [];
+        depth++;
         for (let key in tree) {
+            if (depth === 1) {
+                type = '#' + (key === '篮球' ? 'nba' : 'football');
+            }
             if (typeof (tree[key]) === 'object') {
                 // 继续迭代
                 if (this.year === key || this.month === key || this.date === key) {
                     let state = {expanded:true};
                     if (this.month === key || this.date === key) {
-                        if (this.date === key) {
+                        if (type == location.hash && this.date === key) {
                             state.selected = true;
                             if (currentlock < 4)currentlock = 4;
                         }
                         if (currentlock < 3)currentlock = 3;
                     }
-                    view.push({text: key, state:state, nodes: this.toView(tree[key])});
+                    view.push({text: key, state:state, nodes: this.toView(tree[key], depth)});
                     if (currentlock < 2)currentlock = 2;
                 } else {
-                    view.push({text: key, nodes: this.toView(tree[key])});
+                    view.push({text: key, nodes: this.toView(tree[key], depth)});
                 }
             } else {
-                if (currentlock > lock) {
+                if (type == location.hash && currentlock > lock) {
+                    //type = null;
                     container.attr('game-id', tree[key]);
                     lock = currentlock;
                 }
                 view.push({text: key, game_id: tree[key]});
             }
         }
+        depth--;
         return view;
     };
     // 绘制树形菜单
     this.paint = () => {
-        const view = this.toView(this.tree);
+        let depth = 0;
+        const view = this.toView(this.tree, depth);
         this.func(view);
     };
 }

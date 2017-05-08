@@ -121,7 +121,7 @@ class ImsImagesController extends ImsBaseController
             $tags = Tags::find([
                 'conditions' => 'name IN({tags_name:array})',
                 'bind' => [
-                    'tags_name' => $tags_name,
+                    'tags_name' => array_values(array_merge($tags_name, $name ? [$name] : [])),
                 ]
             ]);
             $image_ids = [];
@@ -136,8 +136,16 @@ class ImsImagesController extends ImsBaseController
             }
         }
         if ($name) {
-            $images_conditions[] = 'name LIKE :name:';
-            $images_bind['name'] = '%'.$name.'%';
+            $search_name = Tags::findFirst([
+                'conditions' => 'name = :name:',
+                'bind' => [
+                    'name' => $name
+                ],
+            ]);
+            if(!$search_name){
+                $images_conditions[] = 'name LIKE :name:';
+                $images_bind['name'] = '%'.$name.'%';
+            }
         }
         if (empty($images_conditions) || empty($images_bind)) {
             return $this->response->setJsonContent([]);
@@ -163,13 +171,13 @@ class ImsImagesController extends ImsBaseController
         $result = [];
         foreach ($images->items as $image) {
             $result[] = [
-                'id' => $image->id,
-                'name' => $image->name,
+                'id'      => $image->id,
+                'name'    => $image->name,
                 'thumb'   => $this->url->get($image->thumb),
                 'url'     => $this->url->get($image->url),
-                'type' => $image->game->type,
+                'type'    => $image->game->type,
                 'game_id' => $image->game_id,
-                'tags' => $image->tags->toArray(),
+                'tags'    => $image->tags->toArray(),
             ];
         }
         return $this->response->setJsonContent($result);
@@ -299,6 +307,7 @@ class ImsImagesController extends ImsBaseController
                 $tags[] = $tag;
             }
         }
+        $image->imagesTags->delete();
         $image->tags  = $tags;
         $image->updated_at = $image->created_at = (new \DateTime('now', new \DateTimeZone('PRC')))->format('Y-m-d H:i:s');
         $image->save();
