@@ -34,7 +34,7 @@ $(() => {
         isAnimated: true
     };
 
-    container.masonry(options);
+    //container.masonry(options);
 
     const regRemove = (obj) => {
         // 点击删除按钮
@@ -57,7 +57,7 @@ $(() => {
                 }, (data) => {
                     if (data.status === 'success') {
                         // remove clicked element
-                        container.masonry('remove', section).masonry('layout');
+                        //container.masonry('remove', section).masonry('layout');
                         // layout remaining item elements
 
                         //section.remove();
@@ -210,11 +210,11 @@ $(() => {
 
     // 刷新图片墙
     let refresh = (conditions, game_id) => {
-        container.masonry('destroy');
+        //container.masonry('destroy');
         wall.clear();
         wall.loadFromGame(conditions);
         container.attr('game-id', game_id);
-        container.masonry(options);
+        //container.masonry(options);
         container.trigger('click');
     };
 
@@ -336,7 +336,7 @@ $(() => {
                             let img = section.find('img');
                             img.removeClass('loading');
                             img.parent('section').css('visibility', 'visible');
-                            container.masonry('prepended', section).masonry('layout');;
+                            //container.masonry('prepended', section).masonry('layout');;
                         });
                         regRemove(section.find('.remove'));
                         regEdit(section.find('.edit'));
@@ -483,32 +483,33 @@ $(() => {
                 start_time.val('');
                 break;
         }
-        $('#btn-search').trigger('click');
+        $('#conditions-search').trigger('click');
     });
 
 
     // 高级搜索
-    $('#conditions-search').on('click', (event) => {
-        $(event.currentTarget).parents('aside').addClass('sr-only');
+    $('#search-image-mane').on('focus', (event) => {
         $('#aside-search').removeClass('sr-only');
+        $('#aside-tree').addClass('sr-only');
         $('.shaixuan').show();
     });
-    // 目录树
-    $('#treeview-search').on('click', (event) => {
-        $(event.currentTarget).parents('aside').addClass('sr-only');
-        $('#aside-tree').removeClass('sr-only');
-        $('.shaixuan').hide();
+    $(document).on('click', (event) => {
+        if ($(event.target).closest('aside').length === 0) {
+            $('#aside-search').addClass('sr-only');
+            $('#aside-tree').removeClass('sr-only');
+            $('.shaixuan').hide();
+        }
     });
-    $('#btn-search').on('click', (event) => {
+    $('#conditions-search').on('click', (event) => {
         let name = $('#search-image-mane');
         let start_time = $('#search-start-time');
         let end_time = $('#search-end-time');
         let football_search = $('#football-search');
         let nba_search = $('#nba-search');
         let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
-        container.masonry('destroy');
+        //container.masonry('destroy');
         wall.clear();
-        container.masonry(options);
+        //container.masonry(options);
         wall.searchImage({
             name: name.val(),
             start_time: start_time.val(),
@@ -516,6 +517,9 @@ $(() => {
             page: 1
         }, (count) => {
             container.attr('data-load', 'true');
+            $('#aside-search').removeClass('sr-only');
+            $('#aside-tree').addClass('sr-only');
+            $('.shaixuan').show();
         });
         container.attr('data-page', 1);
         // container.attr('game-id', game_id);
@@ -544,7 +548,7 @@ $(() => {
                 container.attr('data-load', 'false');
                 if (container.attr('data-method') === 'search') {
                     container.attr('data-page', container.attr('data-page') * 1 + 1);
-                    container.masonry('destory');
+                    //container.masonry('destory');
                     wall.searchImage({
                         name: name.val(),
                         start_time: start_time.val(),
@@ -554,6 +558,9 @@ $(() => {
                         if (count) {
                             container.attr('data-load', 'true');
                         }
+                        $('#aside-search').removeClass('sr-only');
+                        $('#aside-tree').addClass('sr-only');
+                        $('.shaixuan').show();
                     });
                 }
                 //

@@ -9,46 +9,40 @@
 </head>
 <body class="container">
 <div class="row">
-    <aside class="col-md-4 visible-md-block visible-lg-block pull-left" id="aside-tree">
+    <aside class="col-md-4 visible-md-block visible-lg-block pull-left">
+        <div class="form-group">
+            <label for="search-image-mane" class="from-control-static">关键词搜索：</label>
+            <input type="text" id="search-image-mane" class="form-control" placeholder="请输入关键词">
+        </div>
         <h2>
             <button class="btn btn-default" id="conditions-search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> 高级搜索</button>
         </h2>
         <br>
-        <section id="labels" class="tags-label" data-api="<?= $url->get('ims_labels') ?>"></section>
-        <nav>
-            <div id="tree" data-api="<?= $url->get('ims_games') ?>"></div>
-        </nav>
-    </aside>
-    <aside class="col-md-4 visible-md-block visible-lg-block pull-left sr-only" id="aside-search">
-        <h2>
-            <button type="button" id="treeview-search" class="btn btn-default"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> 返回赛程列表</button>
-        </h2>
-        <br>
-        <form id="search">
-            <div class="form-group">
-                <label for="search-image-mane" class="from-control-static">关键词搜索：</label>
-                <input type="text" id="search-image-mane" class="form-control" placeholder="请输入关键词">
-            </div>
-            <br>
-            <input type="text" id="search-start-time" class="sr-only">
-            <input type="text" id="search-end-time" class="sr-only">
-            <br>
-            <div class="form-group">
-                <button type="button" id="btn-search" class="btn btn-primary">搜索</button>
-            </div>
-            <br>
-            <div class="form-group">
-                <label for="search-football-tags" class="from-control-static">足球标签：</label>
-                <input type="text" id="football-search" class="form-control" placeholder="不限">
-                <div class="panel-body tags-label" id="football-tags-search" style="display:block;"></div>
-            </div>
-            <br>
-            <div class="form-group">
-                <label for="search-nba-tags" class="from-control-static">篮球标签：</label>
-                <input type="text" id="nba-search" class="form-control" placeholder="不限">
-                <div class="panel-body tags-label" id="nba-tags-search" style="display:block;"></div>
-            </div>
-        </form>
+        <div id="aside-tree">
+            <section id="labels" class="tags-label" data-api="<?= $url->get('ims_labels') ?>"></section>
+            <nav>
+                <div id="tree" data-api="<?= $url->get('ims_games') ?>"></div>
+            </nav>
+        </div>
+        <div class="sr-only" id="aside-search">
+            <form id="search">
+                <br>
+                <input type="text" id="search-start-time" class="sr-only">
+                <input type="text" id="search-end-time" class="sr-only">
+                <br>
+                <div class="form-group">
+                    <label for="search-football-tags" class="from-control-static">足球标签：</label>
+                    <input type="text" id="football-search" class="form-control" placeholder="不限">
+                    <div class="panel-body tags-label" id="football-tags-search" style="display:block;"></div>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="search-nba-tags" class="from-control-static">篮球标签：</label>
+                    <input type="text" id="nba-search" class="form-control" placeholder="不限">
+                    <div class="panel-body tags-label" id="nba-tags-search" style="display:block;"></div>
+                </div>
+            </form>
+        </div>
     </aside>
     <div class="col-md-8 col-sm-12 col-xs-12 pull-right">
         <section>
