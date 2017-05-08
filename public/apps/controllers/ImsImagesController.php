@@ -3,6 +3,7 @@
 use ImsGames as Games;
 use ImsImages as Images;
 use ImsTags as Tags;
+use ImsLabels as Labels;
 use Phalcon\Image\Adapter\Gd as Image;
 use Phalcon\Mvc\Url;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
@@ -91,72 +92,78 @@ class ImsImagesController extends ImsBaseController
 
     public function searchAction()
     {
-        $name = $this->request->get('name');
+        //$name = $this->request->get('name');
         $start_time = $this->request->get('start_time');
-        $end_time = $this->request->get('end_time');
-        $tags_name = (array)$this->request->get('tags');
-        $page = $this->request->get('page', 'int');
-        $tags_name[] = $name;
-        $game_name = $name;
-        if ($start_time) {
-            $conditions[] = 'date > :start_time:';
-            $bind['start_time'] = $start_time;
-        }
-        /*if ($game_name) {
-            $conditions[] = 'name LIKE :game_name:';
-            $bind['game_name'] = '%'.$game_name.'%';
-        }*/
-        if (!empty($conditions) && !empty($bind)) {
-            $games = Games::find([
-                'conditions' => implode(' AND ', $conditions),
-                'bind' => $bind,
-                'columns' => 'id',
-            ])->toArray();
-            $game_ids = array_map(function ($game) {
-                return $game['id'];
-            }, $games);
-        }
 
-        if ($tags_name) {
-            $tags = Tags::find([
-                'conditions' => 'name IN({tags_name:array})',
+        $page = $this->request->get('page', 'int');
+        $tags_names = (array)$this->request->get('tags');
+        // 所有指定时间的比赛
+        if ($start_time) {
+            $games = Games::find([
+                'conditions' => 'date > :start_time:',
                 'bind' => [
-                    'tags_name' => array_values(array_merge($tags_name, $name ? [$name] : [])),
-                ]
-            ]);
-            $image_ids = [];
-            foreach ($tags as $tag) {
-                $image_ids = array_unique(array_merge($image_ids, (array)array_map(function ($image) {
-                    return $image['id'];
-                }, $tag->images->toArray())));
-            }
-            if (!empty($image_ids)) {
-                $images_conditions[] = 'id IN({image_ids:array})';
-                $images_bind['image_ids'] = array_values($image_ids);
-            }
-        }
-        if ($name) {
-            $search_name = Tags::findFirst([
-                'conditions' => 'name = :name:',
-                'bind' => [
-                    'name' => $name
+                    'start_time' => $start_time
                 ],
             ]);
-            if(!$search_name){
-                $images_conditions[] = 'name LIKE :name:';
-                $images_bind['name'] = '%'.$name.'%';
-            }
-        }
-        if (empty($images_conditions) || empty($images_bind)) {
-            return $this->response->setJsonContent([]);
         } else {
-            $images = Images::find([
-                'conditions' => implode(' AND ', $images_conditions) . (empty($game_ids) ? '' : 'AND game_id IN({game_ids:array})'),
-                'bind' => array_merge($images_bind, empty($game_ids) ? [] : ['game_ids' => array_values($game_ids)]),
-                'order' => 'updated_at DESC',
+            $games = Games::find();
+        }
+        foreach ($games as $game) {
+            $GameIds[] = $game->id;
+        }
+        if (empty($GameIds)) {
+            return $this->response->setJsonContent([]);
+        }
+        $image_ids = array_map(function ($tag_name) use ($GameIds) {
+            // 赛程
+            $game_ids = [];
+            $label = Labels::findFirstByName($tag_name);
+            if ($label) {
+                $game_ids = array_merge($game_ids, array_map(function ($game) use ($GameIds) {return in_array($game['id'], $GameIds) ? $game['id'] : null;}, $label->games->toArray()));
+            }
+            // 比赛名
+            $games = Games::find([
+                'conditions' => 'name LIKE :name:',
+                'bind' => [
+                    'name' => '%' . $tag_name . '%',
+                ],
             ]);
+            if ($games) {
+                $game_ids = array_merge($game_ids, array_map(function ($game) use ($GameIds) {return in_array($game['id'], $GameIds) ? $game['id'] : null;}, $games->toArray()));
+            }
+            $game_ids = array_values(array_unique($game_ids));
+            // 标签
+            $image_ids = [];
+            $tag = Tags::findFirstByName($tag_name);
+            if ($tag) {
+                $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {return in_array($image['game_id'], $GameIds) ? $image['id'] : null;}, $tag->images->toArray()));
+            }
+            // 图片名
+            $images = Images::find([
+                'conditions' => 'name LIKE :name:',
+                'bind' => [
+                    'name' => '%' . $tag_name . '%',
+                ],
+            ]);
+            if ($images) {
+                $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {return in_array($image['game_id'], $GameIds) ? $image['id'] : null;}, $images->toArray()));
+            }
+            $image_ids = array_values(array_unique($image_ids));
+            return $image_ids;
+        }, $tags_names);
+        if (count($image_ids) > 1) {
+            $image_ids = array_values(call_user_func_array('array_intersect', $image_ids));
+        } else {
+            $image_ids = $image_ids[0];
         }
 
+        $images = Images::find([
+            'conditions' => 'id IN({ids:array})',
+            'bind' => [
+                'ids' => $image_ids,
+            ],
+            'order' => 'updated_at DESC',
+        ]);
         $paginator = new PaginatorModel(
             [
                 "data"  => $images,

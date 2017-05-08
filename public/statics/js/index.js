@@ -101,6 +101,7 @@ $(() => {
             initialTags: [],
             delimiter: ', ',
             placeholder: '输入或选择标签，输入多个标签以空格分割',
+            forceLowercase: false,
             beforeTagSave: (field, editor, tags, tag, val) => {
                 // Remove tag + tag; add tag + val
                 if (tag) {
@@ -122,7 +123,7 @@ $(() => {
             }
         });
     };
-    regTagschenge($('#football-search, #nba-search'));
+    regTagschenge($('#search-image-mane'));
 
 
     const regEdit = (obj) => {
@@ -391,7 +392,7 @@ $(() => {
         type: '足球'
     }, (tags) => {
         createTags($('#football-tags-label'), tags, $('#tags-editor'));
-        createTags($('#football-tags-search'), tags, $('#football-search'));
+        createTags($('#football-tags-search'), tags, $('#search-image-mane'));
         // let football_tags_search = $('#football-tags-search');
         // for (let tag of tags) {
         //     if (tag.name === '|') {
@@ -406,9 +407,9 @@ $(() => {
     }, 'json');
     $.get(imstags.attr('data-api'), {
         type: '篮球'
-    }, (tags) => {
-        createTags($('#nba-tags-label'), tags, $('#tags-editor'));
-        createTags($('#nba-tags-search'), tags, $('#nba-search'));
+    }, (tags_nba) => {
+        createTags($('#nba-tags-label'), tags_nba, $('#tags-editor'));
+        createTags($('#nba-tags-search'), tags_nba, $('#search-image-mane'));
     }, 'json');
 
     // 提交图片信息修改
@@ -510,9 +511,10 @@ $(() => {
         let name = $('#search-image-mane');
         let start_time = $('#search-start-time');
         let end_time = $('#search-end-time');
-        let football_search = $('#football-search');
-        let nba_search = $('#nba-search');
-        let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
+        //let football_search = $('#football-search');
+        //let nba_search = $('#nba-search');
+        let tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
+        //let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
         //container.masonry('destroy');
         wall.clear();
         //container.masonry(options);
@@ -543,9 +545,9 @@ $(() => {
             let name = $('#search-image-mane');
             let start_time = $('#search-start-time');
             let end_time = $('#search-end-time');
-            let football_search = $('#football-search');
-            let nba_search = $('#nba-search');
-            let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
+            //let football_search = $('#football-search');
+            //let nba_search = $('#nba-search');
+            let tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
 
             let viewH = $(window).height(),//可见高度
                 contentH =$('body').get(0).scrollHeight,//内容高度
