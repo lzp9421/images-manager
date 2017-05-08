@@ -16,6 +16,7 @@
         </div>
         <h2>
             <button class="btn btn-default" id="conditions-search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> 高级搜索</button>
+            <button class="btn btn-default" id="game-tree-list"><span class="glyphicon glyphicon-back" aria-hidden="true"></span> 返回赛程列表</button>
         </h2>
         <br>
         <div id="aside-tree">
@@ -31,14 +32,14 @@
                 <input type="text" id="search-end-time" class="sr-only">
                 <br>
                 <div class="form-group">
-                    <label for="search-football-tags" class="from-control-static sr-only">足球标签：</label>
-                    <input type="text" id="football-search" class="form-control" placeholder="不限">
+                    <label for="search-football-tags" class="from-control-static">足球标签：</label>
+                    <input type="text" id="football-search" class="form-control sr-only" placeholder="不限">
                     <div class="panel-body tags-label" id="football-tags-search" style="display:block;"></div>
                 </div>
                 <br>
                 <div class="form-group">
-                    <label for="search-nba-tags" class="from-control-static sr-only">篮球标签：</label>
-                    <input type="text" id="nba-search" class="form-control" placeholder="不限">
+                    <label for="search-nba-tags" class="from-control-static">篮球标签：</label>
+                    <input type="text" id="nba-search" class="form-control sr-only" placeholder="不限">
                     <div class="panel-body tags-label" id="nba-tags-search" style="display:block;"></div>
                 </div>
             </form>
@@ -66,6 +67,7 @@
             </h2>
             <hr>
             <div id="images-wall" class="row" data-api="<?= $url->get('ims_images') ?>"></div>
+            <h3 id="is-loaded" class="text-center text-warning"></h3>
         </section>
     </div>
 </div>

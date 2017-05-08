@@ -2,11 +2,11 @@
  * Created by lizhipeng on 2017/4/21.
  */
 
-$(() => {
+$(function () {
 
 
     Date.prototype.Format = function(fmt) { //author: meizz
-        const o = {
+        var o = {
             "M+" : this.getMonth() + 1,               //月份
             "d+" : this.getDate(),                    //日
             "h+" : this.getHours(),                   //小时
@@ -17,18 +17,18 @@ $(() => {
         };
         if(/(y+)/.test(fmt))
             fmt=fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-        for(let k in o)
+        for(var k in o)
             if(new RegExp("(" + k + ")").test(fmt))
                 fmt = fmt.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
         return fmt;
     };
 
 
-    const container = $('#images-wall');
+    var container = $('#images-wall');
     // 图片墙
-    const imstags = $('#tags');
+    var imstags = $('#tags');
 
-    const options = {
+    var options = {
         itemSelector : '.box',
         columnWidth: 1,
         isAnimated: true
@@ -42,9 +42,9 @@ $(() => {
     }
     //container.masonry(options);
 
-    const regRemove = (obj) => {
+    var regRemove = function(obj) {
         // 点击删除按钮
-        obj.on('click', (event) => {
+        obj.on('click', function (event) {
             let section = $(event.currentTarget).closest('section');
             swal({
                 title: '确定要删除该图片吗？',
@@ -55,12 +55,12 @@ $(() => {
                 cancelButtonText: '取消',
                 closeOnConfirm: false,
                 imageUrl: section.find('img').attr('src')
-            }, () => {
+            }, function () {
                 $.post(container.attr('data-api') + '/destroy', {
                     ids: [
                         section.attr('image-id')
                     ]
-                }, (data) => {
+                }, function (data) {
                     if (data.status === 'success') {
                         // remove clicked element
                         //container.masonry('remove', section).masonry('layout');
@@ -86,23 +86,23 @@ $(() => {
         });
     };
 
-    const setTag = (o, t, b) => {
-        let tags = o.find('span:contains(' + t + ')');
-        tags.each((i, e) => {
+    var setTag = function (o, t, b) {
+        var tags = o.find('span:contains(' + t + ')');
+        tags.each(function (i, e) {
             if ($(e).text() === t) {
                 $(e).siblings('input[type="checkbox"]').prop("checked", b);
             }
         });
     };
-    const regTagschenge = (obj) => {
-        const football_tags = $('#football-tags-search');
-        const nba_tags = $('#nba-tags-search');
+    var regTagschenge = function (obj) {
+        var football_tags = $('#football-tags-search');
+        var nba_tags = $('#nba-tags-search');
         obj.tagEditor({
             initialTags: [],
             delimiter: ', ',
             placeholder: '输入或选择标签，输入多个标签以空格分割',
             forceLowercase: false,
-            beforeTagSave: (field, editor, tags, tag, val) => {
+            beforeTagSave: function (field, editor, tags, tag, val) {
                 // Remove tag + tag; add tag + val
                 if (tag) {
                     // 表示修改，先删除tsgs
@@ -115,7 +115,7 @@ $(() => {
                     setTag(football_tags, val, true);
                 }
             },
-            beforeTagDelete: (field, editor, tags, val) => {
+            beforeTagDelete: function (field, editor, tags, val) {
                 // Remove tag + val;
                 // 删除
                 setTag(nba_tags, val, false);
@@ -126,19 +126,19 @@ $(() => {
     regTagschenge($('#search-image-mane'));
 
 
-    const regEdit = (obj) => {
-        obj.on('click', (event) => {
+    var regEdit = function (obj) {
+        obj.on('click', function (event) {
             // 内置标签选择框，只显示当前分类的标签
             let type = $(event.currentTarget).parents('section').attr('type');
-            const football_tags = $('#football-tags-label');
-            const nba_tags = $('#nba-tags-label');
+            var football_tags = $('#football-tags-label');
+            var nba_tags = $('#nba-tags-label');
             // 打开图片编辑
             let tags = JSON.parse($(event.currentTarget).parents('section').attr('image-tags'));
             $('#tags-editor').tagEditor('destroy').val('').tagEditor({
                 initialTags: tags,
                 delimiter: ', ',
                 placeholder: '输入或选择标签，输入多个标签以空格分割',
-                beforeTagSave: (field, editor, tags, tag, val) => {
+                beforeTagSave: function (field, editor, tags, tag, val) {
                     // Remove tag + tag; add tag + val
                     if (tag) {
                         // 表示修改，先删除tsgs
@@ -151,7 +151,7 @@ $(() => {
                         setTag(football_tags, val, true);
                     }
                 },
-                beforeTagDelete: (field, editor, tags, val) => {
+                beforeTagDelete: function (field, editor, tags, val) {
                     // Remove tag + val;
                     // 删除
                     setTag(nba_tags, val, false);
@@ -171,7 +171,7 @@ $(() => {
                     nba_tags.css('display', 'block');
                     // 根据文本框中的标签自动选择tags-label中的标签
                     nba_tags.find('input[type="checkbox"]').prop("checked", false);
-                    tags.forEach((tag) => {
+                    tags.forEach(function (tag) {
                         setTag(nba_tags, tag, true);
                     });
                     break;
@@ -180,7 +180,7 @@ $(() => {
                     football_tags.css('display', 'block');
                     // 根据文本框中的标签自动将tags-label中的标签设置为选中状态
                     football_tags.find('input[type="checkbox"]').prop("checked", false);
-                    tags.forEach((tag) => {
+                    tags.forEach(function (tag) {
                         setTag(football_tags, tag, true);
                     });
                     break;
@@ -189,11 +189,11 @@ $(() => {
         });
     };
 
-    const wall = new ImageWall(container, (count) => {
+    var wall = new ImageWall(container, function (count) {
         // 图片墙html加载之后执行
-        if (count){
-            const imgLoad = imagesLoaded(container);
-            imgLoad.on('progress', (instance, image) => {
+        if (count) {
+            var imgLoad = imagesLoaded(container);
+            imgLoad.on('progress', function (instance, image) {
                 // 图片加载后，根据是否加载成功，标记图片样式
                 if (image.isLoaded) {
                     $(image.img).removeClass('loading');
@@ -203,7 +203,7 @@ $(() => {
                 $(image.img).parent('section').css('visibility', 'visible');
                 //container.masonry('appended', $(image.img).parent('section')).masonry('layout');
             });
-            imgLoad.on('always', () => {
+            imgLoad.on('always', function () {
                 container.viewer({
                     url: 'data-original'
                 });
@@ -216,7 +216,7 @@ $(() => {
     });
 
     // 刷新图片墙
-    let refresh = (conditions, game_id) => {
+    var refresh = function (conditions, game_id) {
         //container.masonry('destroy');
         wall.clear();
         wall.loadFromGame(conditions);
@@ -225,19 +225,19 @@ $(() => {
         container.trigger('click');
     };
 
-    let createTreeView = (view) =>{
-        let tree = $('#tree');
+    var createTreeView = function (view) {
+        var tree = $('#tree');
         tree.treeview({
             data: view,
-            onNodeSelected: (event, data) => {
-                let conditions = {};
-                let game_id;
+            onNodeSelected: function (event, data) {
+                var conditions = {};
+                var game_id;
                 if (typeof (data.game_id) !== 'undefined') {
                     conditions.game_id = game_id = data.game_id;
                 }else if (/^20\d{2}\-[01]\d-[0-3]\d$/.test(data.text)) {
                     conditions.date = data.text;
-                    let month = tree.treeview('getNode', data.parentId);
-                    let year = tree.treeview('getNode', month.parentId);
+                    var month = tree.treeview('getNode', data.parentId);
+                    var year = tree.treeview('getNode', month.parentId);
                     conditions.type = tree.treeview('getNode', year.parentId).text;
                 }/* else if (/^[01]?\d月$/.test(data.text)) {
                     conditions.month = parseInt(data.text);
@@ -259,23 +259,23 @@ $(() => {
     };
 
     // 建立树形菜单
-    const tree = new Tree((view) => {
+    var tree = new Tree(function (view) {
         createTreeView(view);
     });
     // 获取菜单并显示
-    tree.show(() => {
-        let game_id = container.attr('game-id');
-        let conditions = {};
+    tree.show(function () {
+        var game_id = container.attr('game-id');
+        var conditions = {};
         conditions.game_id = game_id;
         refresh(conditions, game_id)
     });
 
-    const xhrOnProgress = (fun) => {
+    var xhrOnProgress = function (fun) {
         xhrOnProgress.onprogress = fun; //绑定监听
         //使用闭包实现监听绑
-        return () => {
+        return function () {
             //通过$.ajaxSettings.xhr();获得XMLHttpRequest对象
-            const xhr = $.ajaxSettings.xhr();
+            var xhr = $.ajaxSettings.xhr();
             //判断监听函数是否为函数
             if (typeof xhrOnProgress.onprogress !== 'function')
                 return xhr;
@@ -287,97 +287,99 @@ $(() => {
         }
     };
 
-    const image_upload = $('#images-upload');
-    image_upload.siblings('button').on('click', (event) => {
-        image_upload.val('').trigger('click').one('change', (event) => {
-            const files = $(event.currentTarget).prop('files');
-            const table = $('<table class="table table-responsive table-condensed"></table>');
-            for (let key in files) {
+    var image_upload = $('#images-upload');
+    image_upload.siblings('button').on('click', function (event) {
+        image_upload.val('').trigger('click').one('change', function (event) {
+            var files = $(event.currentTarget).prop('files');
+            var table = $('<table class="table table-responsive table-condensed"></table>');
+            for (var key in files) {
                 // 过滤非文件内容
                 let file = files[key];
                 if (!(file instanceof File)) {
                     continue;
                 }
-                // 载入文件信息及图片预览
-                let img = $('<img>').attr('src', window.URL.createObjectURL(file)).attr('width', '100%');
-                let td_image = $('<td>').html(img);
-                let td_file = $('<td>').append($('<h5>').text(file.name), $('<p>'));
-                let td_percent = $('<td>');
-                let tr = $('<tr>').append(td_image, td_file, td_percent);
-                table.append(tr);
+                $(function () {
+                    // 载入文件信息及图片预览
+                    var img = $('<img>').attr('src', window.URL.createObjectURL(file)).attr('width', '100%');
+                    var td_image = $('<td>').html(img);
+                    var td_file = $('<td>').append($('<h5>').text(file.name), $('<p>'));
+                    var td_percent = $('<td>');
+                    var tr = $('<tr>').append(td_image, td_file, td_percent);
+                    table.append(tr);
 
-                // 并发上传
-                let formData = new FormData();
-                formData.append('file', file);
-                formData.append('game_id', container.attr('game-id'));
-                $.ajax({
-                    url: container.attr('data-api') + '/upload',
-                    type: 'POST',
-                    cache: false,
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    dataType: 'json',
-                    xhr: xhrOnProgress((e) => {
-                        // 获取进度
-                        let percent = e.loaded / e.total;//计算百分比
-                        tr.css('background', '#f0f0f0 linear-gradient(to right, #e4f1fb ' + percent * 100 + '%, rgba(0, 0, 0, 0) ' + (percent * 100 + (10 - percent * 10)) + '%)');
-                        td_percent.html((percent * 100).toFixed(0) + '%');
-                        td_file.find('p').text((e.loaded / 1024 / 1024).toFixed(2) + 'MB / ' + (e.total / 1024 / 1024).toFixed(2) + 'MB');
-                    })
-                }).done((res) => {
-                    if (res.status === 'success') {
-                        let image = res.data[file.name];
-                        let section = wall.dataToHtml({
-                            id: image.id,
-                            name: image.name,
-                            thumb: image.thumb,
-                            url: image.url,
-                            type: image.game.type,
-                            game_id: image.game_id,
-                            tags: image.tags,
-                        });
-                        container.prepend(section);
-                        section.imagesLoaded().done((instance) => {
-                            // 图片加载后，根据是否加载成功，标记图片样式
-                            let img = section.find('img');
-                            img.removeClass('loading');
-                            img.parent('section').css('visibility', 'visible');
-                            //container.masonry('prepended', section).masonry('layout');;
-                        });
-                        regRemove(section.find('.remove'));
-                        regEdit(section.find('.edit'));
-                        container.viewer('update');
-                        console.log('上传成功');
-                    } else {
+                    // 并发上传
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('game_id', container.attr('game-id'));
+                    $.ajax({
+                        url: container.attr('data-api') + '/upload',
+                        type: 'POST',
+                        cache: false,
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
+                        xhr: xhrOnProgress(function (e) {
+                            // 获取进度
+                            var percent = e.loaded / e.total;//计算百分比
+                            tr.css('background', '#f0f0f0 linear-gradient(to right, #e4f1fb ' + percent * 100 + '%, rgba(0, 0, 0, 0) ' + (percent * 100 + (10 - percent * 10)) + '%)');
+                            td_percent.html((percent * 100).toFixed(0) + '%');
+                            td_file.find('p').text((e.loaded / 1024 / 1024).toFixed(2) + 'MB / ' + (e.total / 1024 / 1024).toFixed(2) + 'MB');
+                        })
+                    }).done(function (res) {
+                        if (res.status === 'success') {
+                            var image = res.data[file.name];
+                            var section = wall.dataToHtml({
+                                id: image.id,
+                                name: image.name,
+                                thumb: image.thumb,
+                                url: image.url,
+                                type: image.game.type,
+                                game_id: image.game_id,
+                                tags: image.tags,
+                            });
+                            container.prepend(section);
+                            section.imagesLoaded().done(function (instance) {
+                                // 图片加载后，根据是否加载成功，标记图片样式
+                                var img = section.find('img');
+                                img.removeClass('loading');
+                                img.parent('section').css('visibility', 'visible');
+                                //container.masonry('prepended', section).masonry('layout');;
+                            });
+                            regRemove(section.find('.remove'));
+                            regEdit(section.find('.edit'));
+                            container.viewer('update');
+                            console.log('上传成功');
+                        } else {
+                            tr.css('background', '#f2dede');
+                            alert('上传失败');
+                        }
+                    }).fail(function(res) {
                         tr.css('background', '#f2dede');
-                        console.log('上传失败');
-                    }
-                }).fail((res) => {
-                    tr.css('background', '#f2dede');
-                    console.log('上传失败');
+                        alert('上传失败');
+                    });
                 });
             }
-            let update_modal = $('#upload-modal');
+            var update_modal = $('#upload-modal');
             update_modal.find('.modal-body').html(table);
             update_modal.modal('show');
         });
     });
 
     // 生成标签
-    let createTags = (obj, tags, editor) => {
-        for (let tag of tags) {
+    let createTags = function (obj, tags, editor) {
+        for (var tag of tags) {
             if (tag.name === '|') {
                 obj.append('<hr>');
                 continue;
             }
-            let label = $('<label>').attr('for', editor.attr('id') + 'tag-' + tag.id);
-            let checkbox = $('<input type="checkbox" id="' + editor.attr('id') + 'tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
-            let span = $('<span>').addClass('label label-info').text(tag.name);
+            var label = $('<label>').attr('for', editor.attr('id') + 'tag-' + tag.id);
+            var checkbox = $('<input type="checkbox" id="' + editor.attr('id') + 'tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
+            var span = $('<span>').addClass('label label-info').text(tag.name);
             obj.append(label.append(checkbox, span));
         }
-        obj.find('input[type="checkbox"]').on('change', (event) => {
-            let tag = $(event.currentTarget).siblings('span').text();
+        obj.find('input[type="checkbox"]').on('change', function (event) {
+            var tag = $(event.currentTarget).siblings('span').text();
             if ($(event.currentTarget).is(":checked")) {
                 // 选中
                 editor.tagEditor('addTag', tag);
@@ -390,7 +392,7 @@ $(() => {
 
     $.get(imstags.attr('data-api'), {
         type: '足球'
-    }, (tags) => {
+    }, function (tags) {
         createTags($('#football-tags-label'), tags, $('#tags-editor'));
         createTags($('#football-tags-search'), tags, $('#search-image-mane'));
         // let football_tags_search = $('#football-tags-search');
@@ -407,13 +409,13 @@ $(() => {
     }, 'json');
     $.get(imstags.attr('data-api'), {
         type: '篮球'
-    }, (tags_nba) => {
+    }, function (tags_nba) {
         createTags($('#nba-tags-label'), tags_nba, $('#tags-editor'));
         createTags($('#nba-tags-search'), tags_nba, $('#search-image-mane'));
     }, 'json');
 
     // 提交图片信息修改
-    $('#update-image').on('click', () => {
+    $('#update-image').on('click', function () {
         let id = $('#image-id').val();
         let name = $('#image-name').val();
         let game_id = $('#image-game_id').val();
@@ -423,9 +425,9 @@ $(() => {
             name: name,
             game_id: game_id,
             tags: tags
-        }, (data) => {
-            const image_id = $('#image-id').val();
-            const section = $('section[image-id="' + image_id + '"]');
+        }, function (data) {
+            var image_id = $('#image-id').val();
+            var section = $('section[image-id="' + image_id + '"]');
             section.attr('image-tags', JSON.stringify(tags));
             section.attr('image-name', name);
             section.find('.title h3').text(name);
@@ -437,33 +439,33 @@ $(() => {
         }, 'json');
     });
 
-    let createLabels = (obj, labels) => {
+    var createLabels = function (obj, labels) {
 
-        for (let $label of labels) {
-            let label = $('<label>').attr('for', 'label-' + $label.id);
-            let checkbox = $('<input type="checkbox" id="label-' + $label.id + '" label-id="' + $label.id + '" class="sr-only">');
-            let span = $('<span>').addClass('label label-info').text($label.name);
+        for (var $label of labels) {
+            var label = $('<label>').attr('for', 'label-' + $label.id);
+            var checkbox = $('<input type="checkbox" id="label-' + $label.id + '" label-id="' + $label.id + '" class="sr-only">');
+            var span = $('<span>').addClass('label label-info').text($label.name);
             obj.append(label.append(checkbox, span));
         }
-        obj.find('input[type="checkbox"]').on('change', (event) => {
-            let tag = $(event.currentTarget).siblings('span').text();
-            let labels = JSON.parse(obj.attr('data-labels') || '[]');
+        obj.find('input[type="checkbox"]').on('change', function (event) {
+            var tag = $(event.currentTarget).siblings('span').text();
+            var labels = JSON.parse(obj.attr('data-labels') || '[]');
             if ($(event.currentTarget).is(":checked")) {
                 // 选中
                 labels = labels.concat([tag]);
                 obj.attr('data-labels', JSON.stringify(labels));
             } else {
                 // 未选中
-                let index = labels.indexOf(tag);
+                var index = labels.indexOf(tag);
                 if (index > -1) {
                     labels.splice(index, 1);
                 }
                 obj.attr('data-labels', JSON.stringify(labels));
                 //$('#tags-editor').tagEditor('removeTag', tag);
             }
-            tree.show(() => {
-                let game_id = container.attr('game-id');
-                let conditions = {};
+            tree.show(function () {
+                var game_id = container.attr('game-id');
+                var conditions = {};
                 conditions.game_id = game_id;
                 refresh(conditions, game_id)
             }, labels);
@@ -471,12 +473,12 @@ $(() => {
     };
 
     let labels = $('#labels');
-    $.get(labels.attr('data-api'), (data) => {
+    $.get(labels.attr('data-api'), function (data) {
         labels.show();
         createLabels(labels, data);
     }, 'json');
 
-    $('.shaixuan').on('click', (event) => {
+    $('.shaixuan').on('click', function (event) {
         let date = new Date;
         let start_time = $('#search-start-time');
         switch ($(event.currentTarget).attr('data-month')) {
@@ -495,25 +497,30 @@ $(() => {
 
 
     // 高级搜索
-    $('#search-image-mane').on('focus', (event) => {
+    $('#search-image-mane').on('focus', function(event) {
         $('#aside-search').removeClass('sr-only');
         $('#aside-tree').addClass('sr-only');
         $('.shaixuan').show();
     });
-    $(document).on('click', (event) => {
-        if ($(event.target).closest('aside').length === 0) {
+
+    $('#game-tree-list').on('click', function(event) {
             $('#aside-search').addClass('sr-only');
             $('#aside-tree').removeClass('sr-only');
             $('.shaixuan').hide();
-        }
     });
-    $('#conditions-search').on('click', (event) => {
-        let name = $('#search-image-mane');
-        let start_time = $('#search-start-time');
-        let end_time = $('#search-end-time');
+    $('#conditions-search').on('click', function(event) {
+        $('#aside-search').removeClass('sr-only');
+        $('#aside-tree').addClass('sr-only');
+        $('.shaixuan').show();
+        if ($('#search-image-mane').val() == '') {
+            return false;
+        }
+        var name = $('#search-image-mane');
+        var start_time = $('#search-start-time');
+        var end_time = $('#search-end-time');
         //let football_search = $('#football-search');
         //let nba_search = $('#nba-search');
-        let tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
+        var tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
         //let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
         //container.masonry('destroy');
         wall.clear();
@@ -523,37 +530,42 @@ $(() => {
             start_time: start_time.val(),
             tags: tags,
             page: 1
-        }, (count) => {
+        }, function (count) {
+            if (!count) {
+                swal({
+                    title: '没有数据',
+                    type: 'error',
+                    timer: 5000
+                });
+            }
             container.attr('data-load', 'true');
-            $('#aside-search').removeClass('sr-only');
-            $('#aside-tree').addClass('sr-only');
-            $('.shaixuan').show();
         });
         container.attr('data-page', 1);
         // container.attr('game-id', game_id);
     });
 
-    let upload_modal = $('#upload-modal');
-    upload_modal.find('button.finish').on('click', (event) => {
-        let length = $(event.currentTarget).parents('.modal-content').find('.modal-body tr').length;
-        let first_image = container.find('section.box').first();
+    var upload_modal = $('#upload-modal');
+    upload_modal.find('button.finish').on('click', function (event) {
+        var length = $(event.currentTarget).parents('.modal-content').find('.modal-body tr').length;
+        var first_image = container.find('section.box').first();
         length === 1  && first_image.find('.glyphicon-pencil').trigger('click');
     });
 
     scrollBottom = function (conditions, game_id) {
         $(document).scroll(function (event) {
-            let name = $('#search-image-mane');
-            let start_time = $('#search-start-time');
-            let end_time = $('#search-end-time');
+            var name = $('#search-image-mane');
+            var start_time = $('#search-start-time');
+            var end_time = $('#search-end-time');
             //let football_search = $('#football-search');
             //let nba_search = $('#nba-search');
-            let tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
+            var tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
 
-            let viewH = $(window).height(),//可见高度
+            var viewH = $(window).height(),//可见高度
                 contentH =$('body').get(0).scrollHeight,//内容高度
                 scrollTop =$('body').scrollTop();//滚动高度
             if(container.attr('data-load') === 'true' && scrollTop/(contentH - viewH) >= 0.95){ //到达底部100px时,加载新内容
                 container.attr('data-load', 'false');
+                $('#is-loaded').text('正在加载');
                 if (container.attr('data-method') === 'search') {
                     container.attr('data-page', container.attr('data-page') * 1 + 1);
                     //container.masonry('destory');
@@ -562,9 +574,11 @@ $(() => {
                         start_time: start_time.val(),
                         tags: tags,
                         page: container.attr('data-page')
-                    }, (count) => {
+                    }, function (count) {
                         if (count) {
                             container.attr('data-load', 'true');
+                        } else {
+                            $('#is-loaded').text('加载完成').removeClass('text-warning').addClass('text-success');
                         }
                         $('#aside-search').removeClass('sr-only');
                         $('#aside-tree').addClass('sr-only');
@@ -577,91 +591,89 @@ $(() => {
     };
     scrollBottom();
 
-
-
-
 });
 
 
-$('#images-wall').on('click', '.box .title', (event) => {
+$('#images-wall').on('click', '.box .title', function (event) {
     $(event.currentTarget).next('img').trigger('click');
 });
 
 // 树形菜单
 function Tree(func) {
-    const container = $('#images-wall');
+    var self = this;
+    var container = $('#images-wall');
     this.func = func;
     this.api = $('#tree').attr('data-api');
     this.labels = [];
     this.tree = {};
     this.view = {};
 
-    this.show = (func, labels) => {
-        labels && (this.labels = labels);
+    this.show = function (func, labels) {
+        labels && (self.labels = labels);
         // 拿到数据
-        this.getData(() => {
+        self.getData(function () {
             // 绘制菜单
-            this.paint();
+            self.paint();
             func();
         });
     };
     // 通过Ajax获取数据，并调用dateToTree转换为树状结构
-    this.getData = (func) => {
-        $.get(this.api, {
-            labels: this.labels
-        }, (data) => {
-            this.tree = [];
+    this.getData = function (func) {
+        $.get(self.api, {
+            labels: self.labels
+        }, function (data) {
+            self.tree = [];
             for (let key in data) {
-                this.dateToTree(data[key]);
+                self.dateToTree(data[key]);
             }
             func();
         }, 'json');
     };
     // 将键值对格式数据转换为树形结构数据
-    this.dateToTree = (data) => {
+    this.dateToTree = function (data) {
         // {date: "date_content", type: "type_content", id: 0, name: ""} --> {type_content: {date_content: {id: 0, name: ""}}}
-        const type = data.type;
-        const date = data.date;
-        const name = data.name;
-        const d = new Date(Date.parse(date));
-        const year = d.Format('yyyy年');
-        const month = d.Format('M月');
-        typeof (this.tree[type]) === 'undefined' && (this.tree[type] = {});
-        typeof (this.tree[type][year]) === 'undefined' && (this.tree[type][year] = {});
-        typeof (this.tree[type][year][month]) === 'undefined' && (this.tree[type][year][month] = {});
-        typeof (this.tree[type][year][month][date]) === 'undefined' && (this.tree[type][year][month][date] = {});
-        this.tree[type][year][month][date][name] = data.id;
+        var type = data.type;
+        var date = data.date;
+        var name = data.name;
+        var d = new Date(Date.parse(date));
+        var year = d.Format('yyyy年');
+        var month = d.Format('M月');
+        typeof (self.tree[type]) === 'undefined' && (self.tree[type] = {});
+        typeof (self.tree[type][year]) === 'undefined' && (self.tree[type][year] = {});
+        typeof (self.tree[type][year][month]) === 'undefined' && (self.tree[type][year][month] = {});
+        typeof (self.tree[type][year][month][date]) === 'undefined' && (self.tree[type][year][month][date] = {});
+        self.tree[type][year][month][date][name] = data.id;
     };
     // 递归生成菜单树
-    const d = new Date();
+    var d = new Date();
     this.year = d.Format('yyyy年');
     this.month = d.Format('M月');
     this.date = d.Format('yyyy-MM-dd');
-    let lock = 0;
-    let currentlock = 1;
-    let type;
-    this.toView = (tree, depth) => {
-        const view = [];
+    var lock = 0;
+    var currentlock = 1;
+    var type;
+    this.toView = function (tree, depth) {
+        var view = [];
         depth++;
-        for (let key in tree) {
+        for (var key in tree) {
             if (depth === 1) {
                 type = '#' + (key === '篮球' ? 'nba' : 'football');
             }
             if (typeof (tree[key]) === 'object') {
                 // 继续迭代
-                if (this.year === key || this.month === key || this.date === key) {
+                if (self.year === key || self.month === key || self.date === key) {
                     let state = {expanded:true};
-                    if (this.month === key || this.date === key) {
-                        if (type == location.hash && this.date === key) {
+                    if (self.month === key || self.date === key) {
+                        if (type == location.hash && self.date === key) {
                             state.selected = true;
                             if (currentlock < 4)currentlock = 4;
                         }
                         if (currentlock < 3)currentlock = 3;
                     }
-                    view.push({text: key, state:state, nodes: this.toView(tree[key], depth)});
+                    view.push({text: key, state:state, nodes: self.toView(tree[key], depth)});
                     if (currentlock < 2)currentlock = 2;
                 } else {
-                    view.push({text: key, nodes: this.toView(tree[key], depth)});
+                    view.push({text: key, nodes: self.toView(tree[key], depth)});
                 }
             } else {
                 if (type == location.hash && currentlock > lock) {
@@ -676,10 +688,11 @@ function Tree(func) {
         return view;
     };
     // 绘制树形菜单
-    this.paint = () => {
-        let depth = 0;
-        const view = this.toView(this.tree, depth);
-        this.func(view);
+    this.paint = function () {
+        var depth = 0;
+        console.log(self.tree.sort());
+        var view = self.toView(self.tree, depth);
+        self.func(view);
     };
 }
 
@@ -687,6 +700,7 @@ function Tree(func) {
 // container:jquery对象
 // func:生成html并插入页面之后调用等回调
 function ImageWall(container, func) {
+    var self = this;
     this.func = func;
     this.container = container;
     this.api = container.attr('data-api');
@@ -697,9 +711,9 @@ function ImageWall(container, func) {
     this.end_time = '';
     this.keywords = '';
     // 从比赛id中加载图片
-    this.loadFromGame = (conditions) => {
+    this.loadFromGame = function (conditions) {
         //game_id, type, year, mouth, date
-        this.getImage({
+        self.getImage({
             game_id: conditions.game_id || null,
             type: conditions.type || null,
             year: conditions.year || null,
@@ -708,50 +722,50 @@ function ImageWall(container, func) {
         });
     };
     // 通过查询条件加载图片
-    this.searchImage = (data, func) => {
-        this.container.attr('data-method', 'search');
-        $.get(this.api + '/search', data, (data) => {
-            for (let key in data) {
-                this.container.append(this.dataToHtml(data[key]));
+    this.searchImage = function (data, func) {
+        self.container.attr('data-method', 'search');
+        $.get(self.api + '/search', data, function (data) {
+            for (var key in data) {
+                self.container.append(self.dataToHtml(data[key]));
             }
-            this.func(data.length);
+            self.func(data.length);
             func(data.length);
         }, 'json');
     };
     // ajax加载图片并插入到图片墙
-    this.getImage = (data) => {
-        this.container.attr('data-method', 'index');
-        $.get(this.api, data, (data) => {
-            for (let key in data) {
-                this.container.append(this.dataToHtml(data[key]));
+    this.getImage = function (data) {
+        self.container.attr('data-method', 'index');
+        $.get(self.api, data, function (data) {
+            for (var key in data) {
+                self.container.append(self.dataToHtml(data[key]));
             }
-            this.func(data.length);
+            self.func(data.length);
         }, 'json');
-        this.container.attr('data-load', 'false');
+        self.container.attr('data-load', 'false');
     };
     // 获取到的json数据转换为html数据
-    this.dataToHtml = (data) => {
+    this.dataToHtml = function (data) {
         // {"id": "1", "name": "test", "url": "http:\/\/your_path", "game_id": "1"} --> html
-        const section = $('<section>').addClass('box col-md-3 col-sm-4 col-xs-6');
+        var section = $('<section>').addClass('box col-md-3 col-sm-4 col-xs-6');
         section.attr('type', data.type);
         section.attr('game-id', data.game_id);
         section.attr('image-id', data.id);
         section.attr('image-name', data.name);
-        section.attr('image-tags', JSON.stringify(data.tags.map((tag) => {
+        section.attr('image-tags', JSON.stringify(data.tags.map( function (tag) {
             return tag.name;
         })));
-        const title = $('<div>').addClass('title').html($('<h3>').text(data.name));
-        const image = $('<img>').addClass('img-thumbnail');
+        var title = $('<div>').addClass('title').html($('<h3>').text(data.name));
+        var image = $('<img>').addClass('img-thumbnail');
         image.attr('src', data.thumb);
         image.attr('title', data.name);
         image.attr('data-original', data.url);
-        const option = $('<div>').addClass('option');
-        const ul = $('<ul>');
-        const remove = $('<li title="删除" class="remove"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
-        const edit = $('<li title="编辑" class="edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="modal" data-target="#image-editor"></span></li>');
+        var option = $('<div>').addClass('option');
+        var ul = $('<ul>');
+        var remove = $('<li title="删除" class="remove"><span class="glyphicon glyphicon glyphicon-trash" aria-hidden="true"></span></li>');
+        var edit = $('<li title="编辑" class="edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true" data-toggle="modal" data-target="#image-editor"></span></li>');
         return section.append(title, image, option.append(ul.append(remove, edit)));
     };
-    this.clear = () => {
-        this.container.empty();
+    this.clear = function () {
+        self.container.empty();
     }
 }
