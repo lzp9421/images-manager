@@ -34,6 +34,12 @@ $(() => {
         isAnimated: true
     };
 
+    if (location.hash === '#nba') {
+        var div1 = $('#football-search').parent('div'), div2 = $('#nba-search').parent('div');
+        var t = div1.prop("outerHTML");
+        div1.replaceWith(div2.prop("outerHTML"));
+        div2.replaceWith(t);
+    }
     //container.masonry(options);
 
     const regRemove = (obj) => {
