@@ -119,7 +119,9 @@ class ImsImagesController extends ImsBaseController
             $game_ids = [];
             $label = Labels::findFirstByName($tag_name);
             if ($label) {
-                $game_ids = array_merge($game_ids, array_map(function ($game) use ($GameIds) {return in_array($game['id'], $GameIds) ? $game['id'] : null;}, $label->games->toArray()));
+                $game_ids = array_merge($game_ids, array_map(function ($game) use ($GameIds) {
+                    return in_array($game['id'], $GameIds) ? $game['id'] : null;
+                }, $label->games->toArray()));
             }
             // 比赛名
             $games = Games::find([
@@ -129,14 +131,32 @@ class ImsImagesController extends ImsBaseController
                 ],
             ]);
             if ($games) {
-                $game_ids = array_merge($game_ids, array_map(function ($game) use ($GameIds) {return in_array($game['id'], $GameIds) ? $game['id'] : null;}, $games->toArray()));
+                $game_ids = array_merge($game_ids, array_map(function ($game) use ($GameIds) {
+                    return in_array($game['id'], $GameIds) ? $game['id'] : null;
+                }, $games->toArray()));
             }
             $game_ids = array_values(array_unique($game_ids));
-            // 标签
             $image_ids = [];
+            // 按照比赛名和赛程名搜索图片
+            if ($game_ids) {
+                $games = Games::find([
+                    'conditions' => 'id IN({ids:array})',
+                    'bind' => [
+                        'ids' => $game_ids,
+                    ],
+                ]);
+                foreach ($games as $game) {
+                    $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {
+                        return in_array($image['game_id'], $GameIds) ? $image['id'] : null;
+                    }, $game->images->toArray()));
+                }
+            }
+            // 标签
             $tag = Tags::findFirstByName($tag_name);
             if ($tag) {
-                $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {return in_array($image['game_id'], $GameIds) ? $image['id'] : null;}, $tag->images->toArray()));
+                $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {
+                    return in_array($image['game_id'], $GameIds) ? $image['id'] : null;
+                }, $tag->images->toArray()));
             }
             // 图片名
             $images = Images::find([
@@ -146,7 +166,9 @@ class ImsImagesController extends ImsBaseController
                 ],
             ]);
             if ($images) {
-                $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {return in_array($image['game_id'], $GameIds) ? $image['id'] : null;}, $images->toArray()));
+                $image_ids = array_merge($image_ids, array_map(function ($image) use ($GameIds) {
+                    return in_array($image['game_id'], $GameIds) ? $image['id'] : null;
+                }, $images->toArray()));
             }
             $image_ids = array_values(array_unique($image_ids));
             return $image_ids;
@@ -155,6 +177,9 @@ class ImsImagesController extends ImsBaseController
             $image_ids = array_values(call_user_func_array('array_intersect', $image_ids));
         } else {
             $image_ids = $image_ids[0];
+        }
+        if (empty($image_ids)) {
+            return $this->response->setJsonContent([]);
         }
 
         $images = Images::find([
