@@ -19,13 +19,13 @@
             <button class="btn btn-default" id="game-tree-list"><span class="glyphicon glyphicon-back" aria-hidden="true"></span> 返回赛程列表</button>
         </h2>
         <br>
-        <div id="aside-tree">
+        <div class="sr-only" id="aside-tree">
             <section id="labels" class="tags-label" data-api="<?= $url->get('ims_labels') ?>"></section>
             <nav>
                 <div id="tree" data-api="<?= $url->get('ims_games') ?>"></div>
             </nav>
         </div>
-        <div class="sr-only" id="aside-search">
+        <div id="aside-search">
             <form id="search">
                 <br>
                 <input type="text" id="search-start-time" class="sr-only">
@@ -53,19 +53,26 @@
                     <button class="btn btn-block btn-primary">上传</button>
                 </span>
                 <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" style="display: none" data-month="1">一个月</button>
+                    <button class="btn btn-block btn-primary shaixuan" data-month="1">一个月</button>
                 </span>
                 <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" style="display: none" data-month="3">三个月</button>
+                    <button class="btn btn-block btn-primary shaixuan" data-month="3">三个月</button>
                 </span>
                 <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" style="display: none" data-month="12">一年</button>
+                    <button class="btn btn-block btn-primary shaixuan" data-month="12">一年</button>
                 </span>
                 <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" style="display: none" data-month="0">全部</button>
+                    <button class="btn btn-block btn-primary shaixuan" data-month="0">全部</button>
                 </span>
             </h2>
             <hr>
+            <div style="display: none" id="new3games">
+                <label for="">最新3场比赛：</label>
+                <button class="btn btn-sm"></button>
+                <button class="btn btn-sm"></button>
+                <button class="btn btn-sm"></button>
+            </div>
+            <br>
             <div id="images-wall" class="row" data-api="<?= $url->get('ims_images') ?>"></div>
             <h3 id="is-loaded" class="text-center text-warning"></h3>
         </section>

@@ -126,14 +126,20 @@ $(function () {
     regTagschenge($('#search-image-mane'));
 
 
+    $('#new3games').on('click', 'button', function (event) {
+        var conditions = {};
+        var game_id = $(this).attr('data-search-id');
+        conditions.game_id = game_id;
+        refresh(conditions, game_id);
+    });
     var regEdit = function (obj) {
         obj.on('click', function (event) {
             // 内置标签选择框，只显示当前分类的标签
-            let type = $(event.currentTarget).parents('section').attr('type');
+            var type = $(event.currentTarget).parents('section').attr('type');
             var football_tags = $('#football-tags-label');
             var nba_tags = $('#nba-tags-label');
             // 打开图片编辑
-            let tags = JSON.parse($(event.currentTarget).parents('section').attr('image-tags'));
+            var tags = JSON.parse($(event.currentTarget).parents('section').attr('image-tags'));
             $('#tags-editor').tagEditor('destroy').val('').tagEditor({
                 initialTags: tags,
                 delimiter: ', ',
@@ -690,7 +696,6 @@ function Tree(func) {
     // 绘制树形菜单
     this.paint = function () {
         var depth = 0;
-        console.log(self.tree.sort());
         var view = self.toView(self.tree, depth);
         self.func(view);
     };
@@ -728,6 +733,13 @@ function ImageWall(container, func) {
             for (var key in data) {
                 self.container.append(self.dataToHtml(data[key]));
             }
+            var new3games = data[0]['new3games'];
+            var length = new3games.length;
+            var count = length > 3 ? 3 : length;
+            for (var i = 0; i < count; i++) {
+                $('#new3games button:eq(' + i + ')').text(new3games[i]['name'] + '(' + new3games[i]['date'] + ')').attr('data-search-id', new3games[i]['id']);
+            }
+            $('#new3games').show();
             self.func(data.length);
             func(data.length);
         }, 'json');

@@ -189,6 +189,18 @@ class ImsImagesController extends ImsBaseController
             ],
             'order' => 'updated_at DESC',
         ]);
+        // 获取最新的3场比赛
+        $game_ids = array_map(function ($image) {
+            return $image['game_id'];
+        }, $images->toArray());
+        $games = Games::find([
+            'conditions' => 'id IN({ids:array})',
+            'bind' => [
+                'ids' => $game_ids,
+            ],
+            'order' => 'date DESC',
+            'limit' => 3,
+        ])->toArray();
         $paginator = new PaginatorModel(
             [
                 "data"  => $images,
@@ -203,13 +215,14 @@ class ImsImagesController extends ImsBaseController
         $result = [];
         foreach ($images->items as $image) {
             $result[] = [
-                'id'      => $image->id,
-                'name'    => $image->name,
-                'thumb'   => $this->url->get($image->thumb),
-                'url'     => $this->url->get($image->url),
-                'type'    => $image->game->type,
-                'game_id' => $image->game_id,
-                'tags'    => $image->tags->toArray(),
+                'id'        => $image->id,
+                'name'      => $image->name,
+                'thumb'     => $this->url->get($image->thumb),
+                'url'       => $this->url->get($image->url),
+                'type'      => $image->game->type,
+                'game_id'   => $image->game_id,
+                'tags'      => $image->tags->toArray(),
+                'new3games' => $games,
             ];
         }
         return $this->response->setJsonContent($result);
