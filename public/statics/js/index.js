@@ -45,7 +45,7 @@ $(function () {
     var regRemove = function(obj) {
         // 点击删除按钮
         obj.on('click', function (event) {
-            let section = $(event.currentTarget).closest('section');
+            var section = $(event.currentTarget).closest('section');
             swal({
                 title: '确定要删除该图片吗？',
                 text: section.attr('image-name'),
@@ -240,6 +240,11 @@ $(function () {
                 var game_id;
                 if (typeof (data.game_id) !== 'undefined') {
                     conditions.game_id = game_id = data.game_id;
+                    if(/新闻$/.test(data.text)) {
+                        conditions.year = 2000;
+                        conditions.type = tree.treeview('getNode', data.parentId).text;
+                        conditions.game_id = undefined;
+                    }
                 }else if (/^20\d{2}\-[01]\d-[0-3]\d$/.test(data.text)) {
                     conditions.date = data.text;
                     var month = tree.treeview('getNode', data.parentId);
@@ -300,11 +305,12 @@ $(function () {
             var table = $('<table class="table table-responsive table-condensed"></table>');
             for (var key in files) {
                 // 过滤非文件内容
-                let file = files[key];
+                var file = files[key];
                 if (!(file instanceof File)) {
                     continue;
                 }
                 $(function () {
+
                     // 载入文件信息及图片预览
                     var img = $('<img>').attr('src', window.URL.createObjectURL(file)).attr('width', '100%');
                     var td_image = $('<td>').html(img);
@@ -325,6 +331,7 @@ $(function () {
                         processData: false,
                         contentType: false,
                         dataType: 'json',
+                        async: false,
                         xhr: xhrOnProgress(function (e) {
                             // 获取进度
                             var percent = e.loaded / e.total;//计算百分比
@@ -373,7 +380,7 @@ $(function () {
     });
 
     // 生成标签
-    let createTags = function (obj, tags, editor) {
+    var createTags = function (obj, tags, editor) {
         for (var tag of tags) {
             if (tag.name === '|') {
                 obj.append('<hr>');
@@ -401,15 +408,15 @@ $(function () {
     }, function (tags) {
         createTags($('#football-tags-label'), tags, $('#tags-editor'));
         createTags($('#football-tags-search'), tags, $('#search-image-mane'));
-        // let football_tags_search = $('#football-tags-search');
-        // for (let tag of tags) {
+        // var football_tags_search = $('#football-tags-search');
+        // for (var tag of tags) {
         //     if (tag.name === '|') {
         //         football_tags_search.append('<hr>');
         //         continue;
         //     }
-        //     let label = $('<label>').attr('for', 'secrch-tag-' + tag.id);
-        //     let checkbox = $('<input type="checkbox" id="secrch-tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
-        //     let span = $('<span>').addClass('label label-info').text(tag.name);
+        //     var label = $('<label>').attr('for', 'secrch-tag-' + tag.id);
+        //     var checkbox = $('<input type="checkbox" id="secrch-tag-' + tag.id + '" tag-id="' + tag.id + '" class="sr-only">');
+        //     var span = $('<span>').addClass('label label-info').text(tag.name);
         //     football_tags_search.append(label.append(checkbox, span));
         // }
     }, 'json');
@@ -422,10 +429,10 @@ $(function () {
 
     // 提交图片信息修改
     $('#update-image').on('click', function () {
-        let id = $('#image-id').val();
-        let name = $('#image-name').val();
-        let game_id = $('#image-game_id').val();
-        let tags = $('#tags-editor').tagEditor('getTags')[0].tags;
+        var id = $('#image-id').val();
+        var name = $('#image-name').val();
+        var game_id = $('#image-game_id').val();
+        var tags = $('#tags-editor').tagEditor('getTags')[0].tags;
         $.post(container.attr('data-api') + '/update', {
             id: id,
             name: name,
@@ -478,15 +485,15 @@ $(function () {
         });
     };
 
-    let labels = $('#labels');
+    var labels = $('#labels');
     $.get(labels.attr('data-api'), function (data) {
         labels.show();
         createLabels(labels, data);
     }, 'json');
 
     $('.shaixuan').on('click', function (event) {
-        let date = new Date;
-        let start_time = $('#search-start-time');
+        var date = new Date;
+        var start_time = $('#search-start-time');
         switch ($(event.currentTarget).attr('data-month')) {
             case '1':
             case '3':
@@ -503,16 +510,20 @@ $(function () {
 
 
     // 高级搜索
-    $('#search-image-mane').on('focus', function(event) {
+    $('#search-image-conditions').on('click', function(event) {
         $('#aside-search').removeClass('sr-only');
         $('#aside-tree').addClass('sr-only');
         $('.shaixuan').show();
+        $('#game-tree-list').show();
+        $(event.currentTarget).hide();
     });
 
     $('#game-tree-list').on('click', function(event) {
-            $('#aside-search').addClass('sr-only');
-            $('#aside-tree').removeClass('sr-only');
-            $('.shaixuan').hide();
+        $('#aside-search').addClass('sr-only');
+        $('#aside-tree').removeClass('sr-only');
+        $('.shaixuan').hide();
+        $('#search-image-conditions').show();
+        $(event.currentTarget).hide();
     });
     $('#conditions-search').on('click', function(event) {
         $('#aside-search').removeClass('sr-only');
@@ -524,10 +535,10 @@ $(function () {
         var name = $('#search-image-mane');
         var start_time = $('#search-start-time');
         var end_time = $('#search-end-time');
-        //let football_search = $('#football-search');
-        //let nba_search = $('#nba-search');
+        //var football_search = $('#football-search');
+        //var nba_search = $('#nba-search');
         var tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
-        //let tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
+        //var tags = football_search.tagEditor('getTags')[0].tags.concat(nba_search.tagEditor('getTags')[0].tags);
         //container.masonry('destroy');
         wall.clear();
         //container.masonry(options);
@@ -562,8 +573,8 @@ $(function () {
             var name = $('#search-image-mane');
             var start_time = $('#search-start-time');
             var end_time = $('#search-end-time');
-            //let football_search = $('#football-search');
-            //let nba_search = $('#nba-search');
+            //var football_search = $('#football-search');
+            //var nba_search = $('#nba-search');
             var tags = $('#search-image-mane').tagEditor('getTags')[0].tags;
 
             var viewH = $(window).height(),//可见高度
@@ -629,7 +640,7 @@ function Tree(func) {
             labels: self.labels
         }, function (data) {
             self.tree = [];
-            for (let key in data) {
+            for (var key in data) {
                 self.dateToTree(data[key]);
             }
             func();
@@ -648,7 +659,11 @@ function Tree(func) {
         typeof (self.tree[type][year]) === 'undefined' && (self.tree[type][year] = {});
         typeof (self.tree[type][year][month]) === 'undefined' && (self.tree[type][year][month] = {});
         typeof (self.tree[type][year][month][date]) === 'undefined' && (self.tree[type][year][month][date] = {});
-        self.tree[type][year][month][date][name] = data.id;
+        if (year == '2000年') {
+            self.tree[type][year] = data.id;
+        } else {
+            self.tree[type][year][month][date][name] = data.id;
+        }
     };
     // 递归生成菜单树
     var d = new Date();
@@ -663,31 +678,42 @@ function Tree(func) {
         depth++;
         for (var key in tree) {
             if (depth === 1) {
-                type = '#' + (key === '篮球' ? 'nba' : 'football');
+                type = '#' + (key === '篮球' ? 'nba' : 'zuqiu ');
             }
             if (typeof (tree[key]) === 'object') {
                 // 继续迭代
                 if (self.year === key || self.month === key || self.date === key) {
-                    let state = {expanded:true};
+                    var state = {expanded:true};
                     if (self.month === key || self.date === key) {
                         if (type == location.hash && self.date === key) {
-                            state.selected = true;
+                            //state.selected = true;
                             if (currentlock < 4)currentlock = 4;
                         }
                         if (currentlock < 3)currentlock = 3;
                     }
-                    view.push({text: key, state:state, nodes: self.toView(tree[key], depth)});
+                    view.push({text: key, state:{expanded:true}, nodes: self.toView(tree[key], depth)});
                     if (currentlock < 2)currentlock = 2;
                 } else {
                     view.push({text: key, nodes: self.toView(tree[key], depth)});
                 }
             } else {
-                if (type == location.hash && currentlock > lock) {
-                    //type = null;
-                    container.attr('game-id', tree[key]);
-                    lock = currentlock;
+                // if (type == location.hash && currentlock > lock) {
+                //     //type = null;
+                //     container.attr('game-id', tree[key]);
+                //     lock = currentlock;
+                // }
+
+                if (key === '2000年') {
+                    if (type == location.hash) {
+                        state.selected = true;
+                        container.attr('game-id', tree[key]);
+                    }
+                    var text = type.toUpperCase() === '#NBA' ? '篮球新闻' : '足球新闻';
+                    view.push({text: text, state:state, game_id: tree[key]});
+
+                } else {
+                    view.push({text: key, game_id: tree[key]});
                 }
-                view.push({text: key, game_id: tree[key]});
             }
         }
         depth--;

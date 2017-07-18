@@ -10,13 +10,18 @@
 <body class="container">
 <div class="row">
     <aside class="col-md-4 visible-md-block visible-lg-block pull-left">
+        <div>
+            <br>
+            <button class="btn btn-default btn-sm" id="search-image-conditions" style="display: none"><span class="glyphicon glyphicon-back" aria-hidden="true"></span> 返回高级搜索</button>
+            <button class="btn btn-default btn-sm" id="game-tree-list"><span class="glyphicon glyphicon-back" aria-hidden="true"></span> 返回赛程列表</button>
+            <br><br>
+        </div>
         <div class="form-group">
             <label for="search-image-mane" class="from-control-static">关键词搜索：</label>
             <input type="text" id="search-image-mane" class="form-control" placeholder="请输入关键词">
         </div>
         <h2>
             <button class="btn btn-default" id="conditions-search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> 高级搜索</button>
-            <button class="btn btn-default" id="game-tree-list"><span class="glyphicon glyphicon-back" aria-hidden="true"></span> 返回赛程列表</button>
         </h2>
         <br>
         <div class="sr-only" id="aside-tree">
@@ -48,21 +53,22 @@
     <div class="col-md-8 col-sm-12 col-xs-12 pull-right">
         <section>
             <h2 class="row">
-                <span class="col-md-2 col-sm-2 col-xs-3">
+                <span class="col-md-2 col-sm-2 col-xs-2">
                     <input type="file" id="images-upload" multiple accept="image/jpeg,image/png,image/gif,image/bmp" style="display: none">
-                    <button class="btn btn-block btn-primary">上传</button>
+                    <button class="btn btn-block btn-primary"><i class="glyphicon glyphicon-upload"></i> 上传</button>
                 </span>
-                <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" data-month="1">一个月</button>
+                <span class="col-md-2 col-sm-2 col-xs-2"></span>
+                <span class="col-md-2 col-sm-2 col-xs-2">
+                    <button class="btn btn-block btn-default btn-sm shaixuan" data-month="1"><i class="glyphicon glyphicon-search"></i> 一个月</button>
                 </span>
-                <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" data-month="3">三个月</button>
+                <span class="col-md-2 col-sm-2 col-xs-2">
+                    <button class="btn btn-block btn-default btn-sm shaixuan" data-month="3"><i class="glyphicon glyphicon-search"></i> 三个月</button>
                 </span>
-                <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" data-month="12">一年</button>
+                <span class="col-md-2 col-sm-2 col-xs-2">
+                    <button class="btn btn-block btn-default btn-sm shaixuan" data-month="12"><i class="glyphicon glyphicon-search"></i> 一年</button>
                 </span>
-                <span class="col-md-2 col-sm-2 col-xs-3">
-                    <button class="btn btn-block btn-primary shaixuan" data-month="0">全部</button>
+                <span class="col-md-2 col-sm-2 col-xs-2">
+                    <button class="btn btn-block btn-default btn-sm shaixuan" data-month="0"><i class="glyphicon glyphicon-search"></i> 全部</button>
                 </span>
             </h2>
             <hr>
